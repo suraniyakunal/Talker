@@ -1,0 +1,13 @@
+@import 'tailwindcss';
+
+:root {
+  --bg-dark: hsl(0 0% 0%);
+  --bg: hsl(0 0% 5%);
+  --bg-light: hsl(0 0% 10%);
+  --text: hsl(0 0% 95%);
+  --text-muted: hsl(0 0% 70%);
+}
+
+body {
+  background-color: var(--bg-dark);
+}
