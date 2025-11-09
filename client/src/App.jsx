@@ -1,6 +1,6 @@
 import './App.css';
 import './main.css'
-import LoginPage from './components/Login.jsx';
+import LoginPage from './components/SignUp.jsx';
 
 function App() {
   return (
