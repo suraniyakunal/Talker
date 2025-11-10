@@ -13,6 +13,18 @@
   --text-muted: hsl(0 0% 70%);
 }
 
+.dark-black {
+  background-color: var(--bg-dark);
+}
+
+.medium-black {
+  background-color: var(--bg);
+}
+
+.light-black {
+  background-color: var(--bg-light);
+}
+
 body {
   background-color: var(--bg-dark);
 }
