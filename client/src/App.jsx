@@ -1,95 +1,118 @@
+import { Routes, Route, Link, isSession } from 'react-router-dom'
+import Login from './components/Login.jsx'
+import { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
+import io from 'socket.io-client'
+
+const SOCKET_URL = 'http://localhost:3000';
 
 function App() {
+  const socketRef = useRef(null);
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (!socketRef.current) {
+      socketRef.current = io(SOCKET_URL);
+
+      socketRef.current.on('connect', () => {
+        console.log('Connected successfully!');
+      });
+
+      socketRef.current.on('disconnect', () => {
+        console.log('Disconnected');
+      });
+    }
+
+    // ✅ Crucial cleanup function
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null; // Clear the ref on unmount
+      }
+    };
+  }, []); // Run only once when the component mounts
+
   return (
     <>
+      <Login />
+      {/* <Routes> */}
+      {/* Path "/" renders HomePage */}
+      {/* <Route path="/" element={<HomePage />} /> */}
+
+      {/* Path "/chat" renders ChatPage */}
+      {/* <Route path="/chat" element={<ChatPage />} /> */}
+
+      {/* Path "/login" renders LoginPage */}
+      {/* <Route path="/login" element={<LoginPage />} /> */}
+
+      {/* Dynamic route with a parameter */}
+      {/* <Route path="/profile/:userId" element={<ProfilePage />} /> */}
+
+      {/* Catch-all route for any undefined paths */}
+      {/* <Route path="*" element={<NotFoundPage />} /> */}
+
       {/* mobile design*/}
-      <div className='min-w-screen block lg:hidden flex flex-col'>
-        <header className="sticky text-xl top-0 left-0 right-0 z-10 bg-green-800 h-20 px-4 flex items-center justify-between shadow-md">
-          <div className="flex items-center gap-2">
-            {/* <img src="/profile.jpg" alt="profile" className="rounded-full w-10 h-10" /> */}
-            <span className="font-semibold">Talker</span>
-          </div>
-          <div className="flex gap-3">
-            {/* Icon buttons: status, new chat, menu */}
-            <button>{/* SVG Icons */}Rooms</button>
-          </div>
-        </header>
+      {/* <div className='min-w-screen block lg:hidden flex-col'> */}
+      {/* <header className="sticky text-xl top-0 left-0 right-0 z-10 bg-green-800 h-20 px-4 flex items-center justify-between shadow-md"> */}
+      {/* <div className="flex items-center gap-2"> */}
+      {/* <img src="/profile.jpg" alt="profile" className="rounded-full w-10 h-10" /> */}
+      {/* <span className="font-semibold">Talker</span> */}
+      {/* </div> */}
+      {/* <div className="flex gap-3"> */}
+      {/* Icon buttons: status, new chat, menu */}
+      {/* <button>Rooms</button> */}
+      {/* </div> */}
+      {/* </header> */}
 
-        {/* Chat List  */}
-        <main className="pt-16 pb-20 flex-1 overflow-y-auto">
-          {/* {chats.map(chat => ( */}
-          <div className="flex text-white items-center p-4 border-b">
-            {/* <img src={chat.avatar} alt="" className="w-10 h-10 rounded-full mr-3" /> */}
-            <div>
-              <li>pagal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>lallu</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              <li>kunal</li>
-              {/* <div className="font-semibold">{chat.name}</div> */}
-              {/* <div className="text-xs text-neutral-400">{chat.lastMessage}</div> */}
-            </div>
-            {/* <span className="ml-auto text-xs text-neutral-500">{chat.time}</span> */}
-          </div>
-          {/* ))} */}
-        </main>
+      {/* Chat List  */}
+      {/* // <main className="pt-16 pb-20 flex-1 overflow-y-auto"> */}
+      {/* {chats.map(chat => ( */}
+      {/* // <div className="flex text-white items-center p-4 border-b"> */}
+      {/* <img src={chat.avatar} alt="" className="w-10 h-10 rounded-full mr-3" /> */}
+      {/* // <div> */}
+      {/* //   <li>pagal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>lallu</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/* //   <li>kunal</li> */}
+      {/*   // <li>kunal</li> */}
+      {/*   // <li>kunal</li> */}
+      {/*   // <li>kunal</li> */}
+      {/*   // <li>kunal</li> */}
+      {/*   // */}
+      {/*   // <li>kunal</li> */}
+      {/* <div className="font-semibold">{chat.name}</div> */}
+      {/* <div className="text-xs text-neutral-400">{chat.lastMessage}</div> */}
+      {/* </div> */}
+      {/* <span className="ml-auto text-xs text-neutral-500">{chat.time}</span> */}
+      {/* </div> */}
+      {/* ))} */}
+      {/* </main> */}
 
+      {/* Input Bar */}
+      {/* <footer className="fixed bottom-0 left-0 right-0 bg-green-800 px-4 py-3 h-16 text-xl flex justify-evenly"> */}
+      {/* <button type="submit">chats</button> */}
+      {/* <button type="submit">posts</button> */}
+      {/* <button type="submit">rooms</button> */}
+      {/* <button type="submit">profile</button> */}
+      {/* </footer> */}
 
-
-        {/* Input Bar */}
-        <footer className="fixed bottom-0 left-0 right-0 bg-green-800 px-4 py-3 h-16 text-xl flex justify-evenly">
-          <button type="submit">chats</button>
-          <button type="submit">posts</button>
-          <button type="submit">rooms</button>
-          <button type="submit">profile</button>
-        </footer>
-
-      </div>
+      {/* </div> */}
 
 
       {/* Desktop design  */}
-      <div className="min-h-screen hidden lg:block flex flex-col text-white relative">
+      <div className="min-h-screen flex-col text-white relative">
         {/* Header, Sidebar, Main Content will go here */}
 
         <header className="sticky top-0 left-0 right-0 z-10 light-black h-16 px-4 flex items-center justify-between shadow-md">
@@ -116,34 +139,14 @@ function App() {
 
             {/* Outgoing Message */}
             <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">
-              "Hey there! 👋"
+              {message}
             </div>
 
             {/* Incoming Message */}
             <div className="self-start bg-neutral-800 text-white rounded-2xl px-4 py-2 max-w-xs">
               "Hi! How are you?"
             </div>
-            {/* Outgoing Message */}
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"Hey there! 👋"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"This is differnet"</div>
-            <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">"This is differnet"</div>
-
+            <div></div>
           </div>
           {/* Input area fixed at bottom */}
           <div className="absolute bottom-20 right-4 flex gap-2 w-[63vw] justify-center items-center px-4 py-4">
@@ -160,12 +163,13 @@ function App() {
         </main>
 
         <footer className="absolute bottom-0 left-0 right-0 light-black z-10  h-16 px-4 gap-20 flex items-center justify-center shadow-md">
-          <button type="submit">chats</button>
-          <button type="submit">posts</button>
-          <button type="submit">rooms</button>
-          <button type="submit">profile</button>
+          <button type="submit"><Link to='/chat'>chats</Link></button>
+          <button type="submit"><Link to='/posts'>posts</Link></button>
+          <button type="submit"><Link to='/rooms'>rooms</Link></button>
+          <button type="submit"><Link to='/profile'>profile</Link></button>
         </footer>
       </div>
+      {/* </Routes> */}
     </>
   );
 }
