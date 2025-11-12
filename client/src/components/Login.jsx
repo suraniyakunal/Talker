@@ -1,15 +1,16 @@
 import { React, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
-  const loginHandler = async (e, email, password) => {
+  const loginHandler = async (e, username, password) => {
     e.preventDefault()
 
-    const { data } = await axios.post('/api/users/login', { email, password });
+    const { data } = await axios.post('/api/users/login', { username, password });
 
     // Store token in localStorage
     localStorage.setItem('userInfo', JSON.stringify(data));
