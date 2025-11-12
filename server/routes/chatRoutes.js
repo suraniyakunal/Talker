@@ -1,0 +1,6 @@
+import { protect } from '../middlewares/authMiddleware.js';
+
+// ...
+router.get('/login', protect, chatController.getUserChats); // ONLY logged-in users can access
+// ...
+
