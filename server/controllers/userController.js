@@ -2,11 +2,11 @@ import User from '../models/userModel.js'
 import generateToken from '../auth/generateToken.js'
 
 const authLoginUser = async (req, res) => {
-  const { email, password } = req.body
+  const { username, password } = req.body
 
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ username })
 
-  if (user && await (user.matchPassword(password))) {
+  if (user && await (user.matchPassword({ password }))) {
     res.json({
       _id: user.id,
       username: user.name,
@@ -18,4 +18,4 @@ const authLoginUser = async (req, res) => {
   }
 }
 
-export { authLoginUser }
+export default authLoginUser 
