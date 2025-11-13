@@ -21,20 +21,21 @@ app.use(cors({
 }))
 
 
-
 const server = http.createServer(app)
+dbContext(uri)
 //socket connection
 initializeSocketConnection(server)
-dbContext(uri)
+
 
 //global routes
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json("hello from the server")
 })
 
 app.use('/api/users', userRouter)
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
+
 server.listen(PORT, () => {
   console.log(`The server is online on port ${PORT}'`)
 })
