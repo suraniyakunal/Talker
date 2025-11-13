@@ -1,12 +1,12 @@
 import Navbar from "./Navbar"
 import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client'
-import Login from "./Login.jsx";
-import Footer from './Footer.jsx'
+import Footer from "./Footer";
 
 const SOCKET_URL = 'http://localhost:3000';
 
 const ChatBox = () => {
+
   const socketRef = useRef(null);
   const [message, setMessage] = useState('')
 
@@ -98,15 +98,15 @@ const ChatBox = () => {
         {/* Desktop design  */}
         <div className="min-h-screen flex-col relative">
           {/* Header, Sidebar, Main Content will go here */}
-          <Navbar />
 
+          <Navbar />
 
           <main className="flex h-[calc(100vh-4rem)] mt-20">
             <div className="w-1/3 border-r border-gray-700 overflow-y-auto h-full p-4">
-              <div className="flex flex-col items-center justify-center w-full">
+              <div className="flex flex-col items-center medium-black justify-center w-full">
                 {/* Multiple contacts */}
                 {[...Array(30).keys()].map(i => (
-                  <h1 key={i} className="mb-4 light-black border">Contact {i + 1}</h1>
+                  <h1 key={i} className="mb-4 normal-text light-black border">Contact {i + 1}</h1>
                 ))}
               </div>
             </div>
@@ -129,14 +129,15 @@ const ChatBox = () => {
                 type="text"
                 name="Message"
                 placeholder="Type your messages"
-                className="w-full rounded-lg shadow-md h-10 focus:ring-2 focus:outline-none focus:ring-indigo-500 px-3 py-2"
+                className="w-full muted-text rounded-lg shadow-sm shadow-amber-50 h-10 focus:outline-none px-3 py-2"
               />
-              <button type="submit" className=" font-semibold shadow-md rounded h-10 w-20 bg-indigo-600">
+              <button type="submit" className=" font-semibold normal-text shadow-md rounded h-10 w-20 bg-indigo-600">
                 Send
               </button>
             </div>
           </main>
         </div>
+
         <Footer />
       </div>
     </>
