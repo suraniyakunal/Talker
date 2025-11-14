@@ -25,30 +25,16 @@
   background-color: var(--bg-light);
 }
 
+.normal-text {
+
+  color: var(--text);
+}
+
+.muted-text {
+
+  color: var(--text-muted);
+}
+
 body {
   background-color: var(--bg-dark);
-}
-
-.container {
-  background-color: var(--bg);
-}
-
-h2 {
-  color: var(--text);
-}
-
-input {
-  color: var(--text);
-  background-color: var(--bg-light);
-}
-
-/* button { */
-/*   background-color: var(--text); */
-/*   padding: 8px; */
-/*   color: black; */
-/*   border-radius: 6px; */
-/* } */
-
-h6 {
-  color: var(--text-muted);
 }

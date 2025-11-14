@@ -2,14 +2,20 @@ import mongoose from 'mongoose'
 import bcrypt from 'bcryptjs'
 
 const userSchema = new mongoose.Schema({
-  id: { type: Number, unique: true },
-  email: { type: String, unique: true, required: true, trim: true },
-  username: { type: String, required: true, unique: true, trim: true },
+  email: { type: String, required: true, trim: true },
+  username: { type: String, required: true, trim: true },
   password: { type: String, required: true, trim: true },
   role: { type: String, enum: ['Normal', 'Moderator', 'Vip'], default: 'Normal' },
 },
   { timestamps: true }
 )
+
+
+// Add a method to the user schema to compare passwords
+userSchema.methods.matchPassword = async function (enteredPassword) {
+  // 'this.password' refers to the hashed password stored in the database
+  return await bcrypt.compare(enteredPassword, this.password);
+}
 
 const User = mongoose.model('Users', userSchema)
 
