@@ -1,7 +1,7 @@
 import Navbar from "./Navbar"
 import { useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client'
-import Footer from "./Footer";
+import Footer from "./Aside";
 
 const SOCKET_URL = 'http://localhost:3000';
 
@@ -99,46 +99,46 @@ const ChatBox = () => {
         <div className="min-h-screen flex-col relative">
           {/* Header, Sidebar, Main Content will go here */}
 
-          <Navbar />
-
-          <main className="flex h-[calc(100vh-4rem)] mt-20">
-            <div className="w-1/3 border-r border-gray-700 overflow-y-auto h-full p-4">
-              <div className="flex flex-col items-center medium-black justify-center w-full">
-                {/* Multiple contacts */}
-                {[...Array(30).keys()].map(i => (
-                  <h1 key={i} className="mb-4 normal-text light-black border">Contact {i + 1}</h1>
-                ))}
-              </div>
-            </div>
-            <div className="flex h-[69vh] flex-col justify-items-end items-center flex-1 gap-3 overflow-y-auto relative w-full">
-
-              {/* Outgoing Message */}
-              <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs">
-
-              </div>
-
-              {/* Incoming Message */}
-              <div className="self-start bg-neutral-800 text-white rounded-2xl px-4 py-2 max-w-xs">
-                "Hi! How are you?"
-              </div>
-              <div></div>
-            </div>
-            {/* Input area fixed at bottom */}
-            <div className="absolute bottom-20 right-4 flex gap-2 w-[63vw] justify-center items-center px-4 py-4">
-              <input
-                type="text"
-                name="Message"
-                placeholder="Type your messages"
-                className="w-full muted-text rounded-lg shadow-sm shadow-amber-50 h-10 focus:outline-none px-3 py-2"
-              />
-              <button type="submit" className=" font-semibold normal-text shadow-md rounded h-10 w-20 bg-indigo-600">
-                Send
-              </button>
-            </div>
-          </main>
+          {/* <main className="flex h-[calc(100vh-4rem)] mt-20"> */}
+          {/*   <div> */}
+          {/**/}
+          {/*   </div> */}
+          {/*   <div className="w-1/3 border-r border-gray-700 overflow-y-auto h-full p-4"> */}
+          {/*     <div className="flex flex-col items-center medium-black justify-center w-full"> */}
+          {/*       {/* Multiple contacts */} */}
+          {/*       {[...Array(30).keys()].map(i => ( */}
+          {/*         <h1 key={i} className="mb-4 normal-text light-black border">Contact {i + 1}</h1> */}
+          {/*       ))} */}
+          {/*     </div> */}
+          {/*   </div> */}
+          {/*   <div className="flex h-[69vh] flex-col justify-items-end items-center flex-1 gap-3 overflow-y-auto relative w-full"> */}
+          {/**/}
+          {/*     {/* Outgoing Message */} */}
+          {/*     <div className="self-end bg-indigo-600 text-white rounded-2xl px-4 py-2 max-w-xs"> */}
+          {/**/}
+          {/*     </div> */}
+          {/**/}
+          {/*     {/* Incoming Message */} */}
+          {/*     <div className="self-start bg-neutral-800 text-white rounded-2xl px-4 py-2 max-w-xs"> */}
+          {/*       "Hi! How are you?" */}
+          {/*     </div> */}
+          {/*     <div></div> */}
+          {/*   </div> */}
+          {/*   {/* Input area fixed at bottom */} */}
+          {/*   <div className="absolute bottom-20 right-4 flex gap-2 w-[63vw] justify-center items-center px-4 py-4"> */}
+          {/*     <input */}
+          {/*       type="text" */}
+          {/*       name="Message" */}
+          {/*       placeholder="Type your messages" */}
+          {/*       className="w-full muted-text rounded-lg shadow-sm shadow-amber-50 h-10 focus:outline-none px-3 py-2" */}
+          {/*     /> */}
+          {/*     <button type="submit" className=" font-semibold normal-text shadow-md rounded h-10 w-20 bg-indigo-600"> */}
+          {/*       Send */}
+          {/*     </button> */}
+          {/*   </div> */}
+          {/* </main> */}
         </div>
 
-        <Footer />
       </div>
     </>
 
