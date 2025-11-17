@@ -1,7 +1,10 @@
+import Aside from './Aside.jsx'
+
 const Navbar = () => {
   return (
     <header
       className="
+      sticky
         medium-black normal-text
        items-center flex px-4 py-4
       justify-between shadow-lg shadow-cyan-800
@@ -12,8 +15,7 @@ const Navbar = () => {
         <span className="font-semibold">Talker</span>
       </div>
       <div>
-        {/* Icon buttons: status, new chat, menu */}
-        <button>{/* SVG Icons */}Menu</button>
+        <Aside />
       </div>
     </header>
   )
