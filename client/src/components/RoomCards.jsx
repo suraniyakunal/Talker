@@ -3,7 +3,7 @@ import avatar from '../assets/images.jpg'
 import RoomPage from './RoomPage'
 
 
-const RoomCards = ({ setShowParticularRoom }) => {
+const RoomCards = () => {
 
   const [showParticularRoom, setShowParticularRoom] = useState(false)
 
