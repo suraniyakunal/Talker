@@ -1,38 +1,24 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 
-const protect = async (req, res, next) => {
-  let token;
 
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      // Get token from header: "Bearer TOKEN" -> ['Bearer', 'TOKEN']
-      token = req.headers.authorization.split(' ')[1];
-
-      // Verify token and decode user ID
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // Fetch user from DB and attach to request object (optional but useful)
-      req.user = await User.findById(decoded.id).select('-password');
-
-      next(); // Proceed to the next handler
-    } catch (error) {
-      res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-  }
+const verifyToken = (req, res, next) => {
+  const token = req.cookies.token; // Access the cookie using cookie-parser
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    return res.status(401).json({ message: 'Unauthorized: No token provided' });
   }
-};
 
-// Middleware for role-based authorization (e.g., isAdmin)
-const admin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Forbidden: Invalid token' });
+    }
+    req.user = decoded; // Add user payload to request object
     next();
-  } else {
-    res.status(403).json({ message: 'Not authorized as an admin' }); // 403 Forbidden
-  }
+  });
 };
 
-export { protect, admin };
+app.get('/profile', verifyToken, (req, res) => {
+  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
+});
+
