@@ -9,6 +9,7 @@ import SignUp from './components/SignUp.jsx';
 import ChatBox from './components/ChatBox.jsx';
 import NotFound from './components/NotFound.jsx'
 import Posts from './components/Posts.jsx'
+import Rooms from './components/Rooms.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -20,9 +21,9 @@ createRoot(document.getElementById('root')).render(
         <Route path="/signup" element={<SignUp />} />
 
         <Route element={<MainLayout />}>
-          <Route path='/chat' element={<ChatBox />} >
-            <Route path='/chat/posts' element={<Posts />} />
-          </Route>
+          <Route path='/chat' element={<ChatBox />} />
+          <Route path='/posts' element={<Posts />} />
+          <Route path='/rooms' element={<Rooms />} />
         </Route>
 
 

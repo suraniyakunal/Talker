@@ -1,27 +1,23 @@
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom';
-import ChatBox from '../components/ChatBox.jsx'
-import Footer from '../components/Footer.jsx'
+import Chats from '../components/Chats.jsx'
+import Aside from './Aside.jsx'
 import Navbar from './Navbar.jsx';
+import Rooms from './Rooms.jsx';
 
 function MainLayout() {
 
-  // const [isLogged, setIsLogged] = useState(() => !!localStorage.getItem('userInfo'))
-  // const onLoginSucess = () => {
-  //   setIsLogged(true)
-  // }
-  //
-  // if (isLogged) {
-  //   return (<Login onLoginSucess={onLoginSucess} />)
-  // }
   return (
     <>
-      {/* <Navbar /> */}
-      {/* <div> */}
-      {/*   <ChatBox /> */}
-      {/* </div> */}
-      <Outlet />
-      {/* <Footer /> */}
+      <div className='min-h-screen min-w-full'>
+        <Navbar />
+        <div className='flex h-[calc(100vh-72px)] w-full'>
+
+          <div className='w-full'>
+            {/* <Chats /> */}
+            <Rooms />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

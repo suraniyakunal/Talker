@@ -1,8 +1,7 @@
 import { React, useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import SignUp from "./SignUp";
 
 const Login = () => {
 
@@ -22,9 +21,6 @@ const Login = () => {
       const response = await axios.post('/api/users/login', { username, password });
       data = response.data
 
-      // Store token in localStorage
-      localStorage.setItem('userInfo', JSON.stringify(data));
-
       if (data) {
         navigate('/chat')
       }
@@ -32,8 +28,6 @@ const Login = () => {
     } catch (error) {
       console.log("error in confirming the login credential", error)
     }
-
-
 
     // Update React state/context to reflect logged in status
     // navigate('/chat');
