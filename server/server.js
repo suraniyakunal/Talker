@@ -2,6 +2,7 @@ import express from 'express'
 import http from 'http'
 import dotenv from 'dotenv'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { initializeSocketConnection } from './sockets/socketHandle.js'
 import dbContext from './controllers/dbConnection.js'
 import userRouter from './routes/userRoutes.js'
@@ -12,12 +13,14 @@ const app = express()
 const uri = process.env.MONGODB_URL
 
 app.use(express.json())
+app.use(cookieParser())
 
 
 //global middleware
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ["GET", "POST"]
+  methods: ["GET", "POST"],
+  credentials: true
 }))
 
 

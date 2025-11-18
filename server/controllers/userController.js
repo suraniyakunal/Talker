@@ -4,18 +4,25 @@ import bcrypt from 'bcryptjs'
 
 
 const login = async (req, res) => {
-  const { username } = req.body
+  const { username, password } = req.body
   const user = await User.findOne({ username })
 
   if (user) {
 
+    const isMatch = await user.matchPassword(password);
+
     if (isMatch) {
-      res.status(201).json({
-        username: user.name, // Make sure you intend to use user.name here, not user.username
-        email: user.email,
-        token: generateToken(user._id) // Ensure generateToken is defined
-      });
+      const token = generateToken(user._id) // Ensure generateToken is defined
     }
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 3600000,
+    })
+
+    res.status(200).json({ message: 'Login successfull' })
 
   } else {
     res.status(401).json({ message: "invalid email or password" })
