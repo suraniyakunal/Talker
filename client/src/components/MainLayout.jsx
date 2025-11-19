@@ -3,6 +3,7 @@ import Chats from '../components/Chats.jsx'
 import Aside from './Aside.jsx'
 import Navbar from './Navbar.jsx';
 import Rooms from './Rooms.jsx';
+import { Outlet } from 'react-router-dom';
 
 function MainLayout() {
 
@@ -11,11 +12,7 @@ function MainLayout() {
       <div className='min-h-screen min-w-full'>
         <Navbar />
         <div className='flex h-[calc(100vh-72px)] w-full'>
-
-          <div className='w-full'>
-            {/* <Chats /> */}
-            <Rooms />
-          </div>
+          <Outlet />
         </div>
       </div>
     </>

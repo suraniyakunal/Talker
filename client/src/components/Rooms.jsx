@@ -7,7 +7,7 @@ const Rooms = () => {
   const [currentRoom, setCurrentRoom] = useState('voiceRoom')
 
   return (
-    <div className="">
+    <div className="min-w-full min-h-full">
       <div className="flex z-20 fixed left-50 right-50 items-center justify-center px-3 space-x-3 py-2">
         <button onClick={() => { setCurrentRoom('voiceRoom') }} type="submit" className="bg-gray-700 text-white rounded-lg py-1 px-2">Voice</button>
         <button onClick={() => { setCurrentRoom('liveRoom') }} type="submit" className="bg-gray-500 text-white rounded-lg py-1 px-2">Live</button>

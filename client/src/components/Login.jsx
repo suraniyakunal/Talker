@@ -1,13 +1,14 @@
 import { React, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import getCookie from '../auth/getCookie.js'
 
 const Login = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-
+  const [token, setToken] = useState(null)
 
   const navigate = useNavigate()
 
@@ -15,23 +16,26 @@ const Login = () => {
     e.preventDefault()
 
     let data
-
+    let getToken = null
     try {
 
-      const response = await axios.post('/api/users/login', { username, password });
+      const response = await axios.post('/api/users/login', { username, password }, { withCredentials: true })
       data = response.data
 
-      if (data) {
+      getToken = getCookie('token')
+
+      if (getToken) {
         navigate('/chat')
+      } else {
+        navigate('/login')
       }
+      setToken(getToken)
 
     } catch (error) {
       console.log("error in confirming the login credential", error)
     }
 
-    // Update React state/context to reflect logged in status
-    // navigate('/chat');
-  };
+  }
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
       <div className=" max-w-md lg:max-w-lg medium-black rounded-lg py-8">
