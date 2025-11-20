@@ -13,7 +13,6 @@ const Chats = () => {
     setMessage(prev => prev + emojiObject.emoji)
   }
 
-
   const handleSendMessage = (e) => {
     e.preventDefault()
   }
@@ -23,7 +22,6 @@ const Chats = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get('https://jsonplaceholder.typicode.com/users')
-        console.log(response.data)
         setUsers(response.data)
 
       } catch (error) {
@@ -39,10 +37,7 @@ const Chats = () => {
     <main className="flex h-full w-full p-2">
       <div className="w-1/3 border-x overflow-y-auto">
         <div className="flex flex-col light-black justify-center">
-          {/* Multiple contacts */}
-          {/* {[...Array(30).keys()].map(i => ( */}
-          {/*   <h1 key={i} className="normal-text p-6 border-b-2">Contact {i + 1}</h1> */}
-          {/* ))} */}
+
           {users.map((user) => (<h1 className="normal-text rounded-lg hover:bg-gray-500 hover:z-10 hover:p-8 transition-all p-6 shadow-lg shadow-black text-sm" key={user.id}><strong>{user.name}</strong></h1>))}
         </div>
       </div>

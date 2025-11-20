@@ -1,9 +1,10 @@
 import axios from "axios"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 const SignUp = () => {
 
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -11,16 +12,21 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault()
     try {
-      const { data } = await axios.post('/api/users/signup', { username, email, password })
-      console.log(data)
+      const response = await axios.post('/api/users/signup', { username, email, password })
+
+      if (response.status === 201) {
+        console.log("signup succefull", username)
+        navigate('/login')
+        alert(`User &{username} created`)
+      }
     } catch (error) {
-      console.log("error sending the data from signup", error)
+      console.log("some error with the signup", error)
     }
   }
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
-      <div className="container md:max-w-md rounded-lg py-8 ">
-        <h2 className=" text-2xl text-center font-bold mb-6">SignUp :)</h2>
+      <div className="medium-black md:max-w-md rounded-lg py-8 ">
+        <h2 className=" text-2xl normal-text text-center font-bold mb-6">SignUp :)</h2>
         <form onSubmit={handleSignUp} className="space-y-6 px-6">
           <div>
             <input

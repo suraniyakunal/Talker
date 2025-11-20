@@ -25,6 +25,7 @@ createRoot(document.getElementById('root')).render(
           <Route path='chat/:userId' element={<Chats />} />
           <Route path='post' element={<Posts />} />
           <Route path='room' element={<Rooms />} />
+          <Route path='room/:userId' element={<Rooms />} />
         </Route>
 
 
