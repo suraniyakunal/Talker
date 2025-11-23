@@ -1,13 +1,15 @@
-import { React, useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../auth/AuthContext";
 
 const Login = () => {
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
-
+  const { setUser } = useContext(AuthContext)
   const navigate = useNavigate()
 
   const loginHandler = async (e) => {
@@ -15,17 +17,22 @@ const Login = () => {
 
     try {
 
-      const response = await axios.post('/api/users/login', { username, password }, { withCredentials: true })
-
-      if (response.data.success) {
+      const response = await axios.post('/users/login', { username, password }, { withCredentials: true })
+      // Assume response.data contains user info or a success flag
+      if (response.status === 200) {
+        setUser(response.data.user)
         navigate('/chat')
+        console.log('Login Successful');
       } else {
-        navigate('/login')
+        console.log('Login failed');
       }
 
     } catch (error) {
       console.log("error in confirming the login credential", error)
     }
+
+    setUsername('')
+    setPassword('')
 
   }
   return (
