@@ -31,7 +31,7 @@ initializeSocketConnection(server)
 
 
 //global routes
-app.get('/api', (req, res) => {
+app.get('/', (req, res) => {
   res.json("hello from the server")
 })
 

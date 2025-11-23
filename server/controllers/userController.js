@@ -20,7 +20,7 @@ const login = async (req, res) => {
         maxAge: 3600000,
       })
 
-      res.status(200).json({ success: 'Login successfull' })
+      res.status(200).json({ user: { id: user._id, username: user.username } })
     }
 
   } else {
