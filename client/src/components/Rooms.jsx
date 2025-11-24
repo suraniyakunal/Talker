@@ -17,22 +17,7 @@ const Rooms = () => {
       <div className="p-2 overflow-y-auto h-[calc(100vh-4rem)]">
         {currentRoom === 'voiceRoom' &&
           (<div id="voiceRoom" className=" mt-8 grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 space-x-5">
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
-            <RoomCards />
+
           </div>
           )}
 

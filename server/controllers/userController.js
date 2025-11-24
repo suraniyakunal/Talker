@@ -12,17 +12,16 @@ const login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
 
     if (isMatch) {
-      const token = generateToken(user._id) // Ensure generateToken is defined
+      let token = generateToken(user._id) // Ensure generateToken is defined
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict',
+        maxAge: 3600000,
+      })
+
+      res.status(200).json({ user: { id: user._id, username: user.username } })
     }
-
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 3600000,
-    })
-
-    res.status(200).json({ message: 'Login successfull' })
 
   } else {
     res.status(401).json({ message: "invalid email or password" })
@@ -52,7 +51,8 @@ const signUp = async (req, res) => {
       password: hashedPassword,  // Store hashed password correctly
     })
 
-    res.status(201).json({ message: 'User created successfully', userId: savedUser._id })
+    res.status(201).json({ message: 'User created successfully', userName: username })
+    console.log("user created", username)
   } catch (error) {
     console.error('Error in signup:', error)
     res.status(500).json({ message: 'Server error during signup' })
