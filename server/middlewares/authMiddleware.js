@@ -27,6 +27,6 @@ app.get('/chat', verifyToken, (req, res) => {
 app.get('/post', verifyToken, (req, res) => {
   res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
 })
-app.get('/room', verifyToken, (req, res) => {
+app.get('/createRoom', verifyToken, (req, res) => {
   res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
 })

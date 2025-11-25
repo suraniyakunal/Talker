@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import avatar from '../assets/images.jpg'
 import RoomPage from './RoomPage'
+import { Link } from 'react-router-dom'
 
 
-const RoomCards = () => {
+const RoomCards = ({ room }) => {
 
   const [showParticularRoom, setShowParticularRoom] = useState(false)
 
@@ -28,7 +29,7 @@ const RoomCards = () => {
           </div>
 
         </div>
-        <button onClick={() => { setShowParticularRoom(prev => !prev) }} type="submit" className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</button>
+        <Link to={`/rooms/${room.id}`} className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</Link>
       </footer>
     </div>
   )

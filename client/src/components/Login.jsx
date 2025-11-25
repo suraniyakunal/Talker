@@ -17,7 +17,7 @@ const Login = () => {
 
     try {
 
-      const response = await axios.post('/users/login', { username, password }, { withCredentials: true })
+      const response = await axios.post('http://localhost:3000/api/users/login', { username, password }, { withCredentials: true })
       // Assume response.data contains user info or a success flag
       if (response.status === 200) {
         setUser(response.data.user)
