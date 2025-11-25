@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser'
 import { initializeSocketConnection } from './sockets/socketHandle.js'
 import dbContext from './controllers/dbConnection.js'
 import userRouter from './routes/userRoutes.js'
+import roomRouter from './routes/roomRoutes.js'
 
 dotenv.config()
 
@@ -36,6 +37,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api/users', userRouter)
+app.use('/api/rooms', roomRouter)
 
 const PORT = process.env.PORT || 3000
 
