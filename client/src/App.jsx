@@ -7,6 +7,8 @@ import Rooms from './components/Rooms.jsx';
 import Chats from './components/Chats.jsx';
 import ChatOverview from './components/ChatOverview.jsx';
 import MainLayout from './components/MainLayout.jsx'
+import CreateRoom from './components/CreateRoom.jsx';
+
 
 function App() {
 
@@ -18,7 +20,8 @@ function App() {
         <Route path='chat' element={<ChatOverview />} />
         <Route path='chat/:user' element={<Chats />} />
         <Route path='post' element={<Posts />} />
-        <Route path='room' element={<Rooms />} />
+        <Route path='rooms' element={<Rooms />} />
+        <Route path='/createRoom' element={<CreateRoom />} />
         <Route path='room/:userId' element={<Rooms />} />
       </Route>
 
