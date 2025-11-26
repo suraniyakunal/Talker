@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import EmojiPicker from 'emoji-picker-react'
 import axios from "axios"
+import { Link } from "react-router-dom"
 
 
 const ChatOverview = () => {
@@ -13,9 +14,10 @@ const ChatOverview = () => {
     setMessage(prev => prev + emojiObject.emoji)
   }
 
-
   const handleSendMessage = (e) => {
     e.preventDefault()
+
+
   }
 
   useEffect(() => {
@@ -36,7 +38,7 @@ const ChatOverview = () => {
     <main className="flex h-full w-full p-2">
       <div className="w-1/3 border-x overflow-y-auto">
         <div className="flex flex-col light-black justify-center">
-          {users.map((user) => (<h1 className="normal-text rounded-lg hover:bg-gray-500 hover:z-10 hover:p-8 transition-all p-6 shadow-lg shadow-black text-sm" key={user.id}><strong>{user.name}</strong></h1>))}
+          {users.map((user) => (<Link to={`/chats/:${user.id}`} className="normal-text rounded-lg hover:bg-gray-500 hover:z-10 hover:p-8 transition-all p-6 shadow-lg shadow-black text-sm" key={user.id}><strong>{user.name}</strong></Link>))}
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-3 px-3  relative w-full">

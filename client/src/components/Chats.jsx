@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react"
 import EmojiPicker from 'emoji-picker-react'
 import axios from "axios"
+import { Link } from "react-router-dom"
+import { useSocket } from "../socket/SocketContext"
+import { useParams } from "react-router-dom"
+
 
 const Chats = () => {
-
   const [message, setMessage] = useState('')
+  const [recieve, setRecieve] = useState('')
   const [showPicker, setShowPicker] = useState(false)
   const [users, setUsers] = useState([])
+
+  const socket = useSocket()
 
   const onEmojiClick = (emojiObject, e) => {
     e.preventDefault()
@@ -15,17 +21,21 @@ const Chats = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault()
+    socket.on('message', (message) => {
+      console.log(message)
+      setRecieve(message)
+    })
   }
 
   useEffect(() => {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/users')
+        const response = await axios.get('http://localhost:3000/api/users/getUsers', { withCredentials: true })
         setUsers(response.data)
 
       } catch (error) {
-        console.log("error", error)
+        console.log(error)
       }
     }
 
@@ -38,7 +48,7 @@ const Chats = () => {
       <div className="w-1/3 border-x overflow-y-auto">
         <div className="flex flex-col light-black justify-center">
 
-          {users.map((user) => (<h1 className="normal-text rounded-lg hover:bg-gray-500 hover:z-10 hover:p-8 transition-all p-6 shadow-lg shadow-black text-sm" key={user.id}><strong>{user.name}</strong></h1>))}
+          {users.map((user) => (<Link to={`/chats/:${user._id}`} className="normal-text rounded-lg hover:bg-gray-500 hover:z-10 hover:p-8 transition-all p-6 shadow-lg shadow-black text-sm" key={user._id}><strong>{user.username}</strong></Link>))}
         </div>
       </div>
       <div className="flex flex-col flex-1 gap-3 px-3  relative w-full">

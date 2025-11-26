@@ -5,9 +5,9 @@ import NotFound from './components/NotFound.jsx';
 import Posts from './components/Posts.jsx';
 import Rooms from './components/Rooms.jsx';
 import Chats from './components/Chats.jsx';
-import ChatOverview from './components/ChatOverview.jsx';
 import MainLayout from './components/MainLayout.jsx'
 import CreateRoom from './components/CreateRoom.jsx';
+import Profile from './components/Profile.jsx'
 
 
 function App() {
@@ -17,11 +17,12 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}>
         <Route path='/' element={<Navigate to='/chat' replace />} />
-        <Route path='chat' element={<ChatOverview />} />
-        <Route path='chat/:user' element={<Chats />} />
-        <Route path='post' element={<Posts />} />
+        <Route path='chats' element={<Chats />} />
+        <Route path='chats/:userId' element={<Chats />} />
+        <Route path='posts' element={<Posts />} />
+        <Route path='profile' element={<Profile />} />
         <Route path='rooms' element={<Rooms />} />
-        <Route path='/createRoom' element={<CreateRoom />} />
+        <Route path='createRoom/:roomId' element={<CreateRoom />} />
         <Route path='room/:userId' element={<Rooms />} />
       </Route>
 
