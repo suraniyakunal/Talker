@@ -52,13 +52,27 @@ const signUp = async (req, res) => {
       password: hashedPassword,  // Store hashed password correctly
     })
 
-    res.status(201).json({ message: 'User created successfully', userName: username })
-    console.log("user created", username)
+    if (savedUser) {
+      res.status(201).json({ message: 'User created successfully', userName: username })
+      console.log("user created", username)
+    }
   } catch (error) {
     console.error('Error in signup:', error)
     res.status(500).json({ message: 'Server error during signup' })
   }
 }
 
+const getAllUsers = async (req, res) => {
 
-export default { login, signUp }
+  try {
+    const allUsers = await User.find({}, '-password')
+    if (!allUsers) {
+      res.status(401).json({ message: 'there is some issue with getting he users' })
+    }
+    res.status(200).json(allUsers)
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export default { login, signUp, getAllUsers }

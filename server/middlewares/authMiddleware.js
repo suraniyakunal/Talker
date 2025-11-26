@@ -30,3 +30,6 @@ app.get('/post', verifyToken, (req, res) => {
 app.get('/createRoom', verifyToken, (req, res) => {
   res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
 })
+app.post('/getUsers', verifyToken, (req, res) => {
+  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
+})
