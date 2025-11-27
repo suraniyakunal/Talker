@@ -32,10 +32,6 @@ initializeSocketConnection(server)
 
 
 //global routes
-app.get('/', (req, res) => {
-  res.json("hello from the server")
-})
-
 app.use('/api/users', userRouter)
 app.use('/api/rooms', roomRouter)
 
