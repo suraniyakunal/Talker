@@ -21,7 +21,7 @@ const Login = () => {
       // Assume response.data contains user info or a success flag
       if (response.status === 200) {
         setUser(response.data.user)
-        navigate('/chat')
+        navigate('/')
         console.log('Login Successful');
       } else {
         console.log('Login failed');
