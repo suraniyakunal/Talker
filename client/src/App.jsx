@@ -16,7 +16,7 @@ function App() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path='/' element={<Navigate to='/chat' replace />} />
+        <Route path='/' element={<Navigate to='/chats' replace />} />
         <Route path='chats' element={<Chats />} />
         <Route path='chats/:userId' element={<Chats />} />
         <Route path='posts' element={<Posts />} />

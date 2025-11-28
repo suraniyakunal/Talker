@@ -40,7 +40,7 @@ const Chats = () => {
     }
 
     fetchData()
-  }, [])
+  }, [users])
 
 
   return (

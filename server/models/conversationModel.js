@@ -24,9 +24,9 @@ const conversationSchema = new Schema({
 });
 
 // Index participants for fast lookups by user ID
-conversationSchema.index({ participants: 1 });
+conversationSchema.index({ participants: 1 })
 
-const Conversation = mongoose.model('Conversation', conversationSchema);
+const Conversation = mongoose.model('Conversation', conversationSchema)
 
-export default Conversation;
+export default Conversation
 
