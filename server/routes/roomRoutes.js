@@ -1,10 +1,9 @@
 import express from 'express'
-import Room from '../models/roomModel.js'
 import roomController from '../controllers/roomController.js'
-
+import protectedRoutes from '../middlewares/authMiddleware.js'
 const router = express.Router()
 
-router.post('/createRoom', roomController.createRoom)
+router.post('/createRoom', protectedRoutes, roomController.createRoom)
 
 
 export default router
