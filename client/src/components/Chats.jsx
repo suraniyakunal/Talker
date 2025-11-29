@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import EmojiPicker from 'emoji-picker-react'
-import axios from "axios"
+import axiosInsance from "../configs/axios.js"
 import { Link } from "react-router-dom"
 import { useSocket } from "../socket/SocketContext"
 import { useParams } from "react-router-dom"
+import axiosInstance from "../configs/axios.js"
 
 
 const Chats = () => {
@@ -31,7 +32,7 @@ const Chats = () => {
 
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/api/users/getUsers', { withCredentials: true })
+        const response = await axiosInstance.get('/users/getUsers')
         setUsers(response.data)
 
       } catch (error) {
@@ -40,7 +41,7 @@ const Chats = () => {
     }
 
     fetchData()
-  }, [users])
+  }, [])
 
 
   return (
