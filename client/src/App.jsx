@@ -23,7 +23,7 @@ function App() {
     const checkAuth = async () => {
       try {
         const response = await axiosInstance.get('/users/check')
-        if (response.status === 200 && user) {
+        if (response.status === 200) {
           setIsAuthenticated(true)
         } else {
           setIsAuthenticated(false)
@@ -36,7 +36,7 @@ function App() {
     }
 
     checkAuth()
-  }, [user])
+  }, [])
 
   if (loading) return <div>Loading...</div>
   return (
@@ -47,7 +47,7 @@ function App() {
         <Route path='chats/:userId' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
         <Route path='rooms' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
         <Route path='room/:userId' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
-        <Route path='createRoom/:roomId' element={isAuthenticated ? <CreateRoom /> : <Navigate to='/login' />} />
+        <Route path='createRoom' element={isAuthenticated ? <CreateRoom /> : <Navigate to='/login' />} />
         <Route path='posts' element={isAuthenticated ? <Posts /> : <Navigate to='/login' />} />
         <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
       </Route>

@@ -1,16 +1,24 @@
-import { useState, useEffect } from "react"
-import axios from "axios"
+import { useState, useEffect, useContext } from "react"
+import axiosInstance from "../configs/axios.js"
+import { AuthContext } from '../auth/AuthContext.jsx'
 
 const CreateRoom = () => {
+  const { user } = useContext(AuthContext)
   const [input, setInput] = useState({
+    owner: user._id,
     title: "",
-    description: ""
+    role: 'admin',
+    description: "",
+    participants: ''
   })
 
+  useEffect(() => {
+    // console.log('the user details are', user)
+  }, [])
   const handleCreate = async (e) => {
     e.preventDefault()
 
-    const response = await axios.post('http://localhost:3000/api/rooms/createRoom', input, { withCredentials: true })
+    const response = await axiosInstance.post('/rooms/createRoom', { input })
     if (!response) {
       return alert("coudn't create room")
     }
@@ -25,10 +33,10 @@ const CreateRoom = () => {
     }));
   }
   return (
-    <form className="text-white p-8" >
-      <input type="text" value={input.title} onChange={handleChange} name="title" placeholder="topic" />
-      <input type="text" value={input.description} onChange={handleChange} name="description" placeholder="desciption" />
-      <button onClick={handleCreate}>Create</button>
+    <form className="w-full h-full text-white p-8 flex flex-col justify-center items-center bg-amber-800" >
+      <input type="text" value={input.title} onChange={handleChange} name="title" placeholder="topic" className="px-4 py-3 m-2" />
+      <input type="text" value={input.description} onChange={handleChange} name="description" placeholder="desciption" className="px-4 py-3 m-2" />
+      <button onClick={handleCreate} className="bg-black py-3 px-4 rounded-lg">Create</button>
     </form>
   )
 }
