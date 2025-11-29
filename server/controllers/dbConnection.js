@@ -7,6 +7,7 @@ const dbConnect = async (uri) => {
 
   } catch (error) {
     console.log("There is some error with the Database", error)
+    process.exit(1)
   }
 }
 

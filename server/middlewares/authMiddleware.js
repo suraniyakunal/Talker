@@ -1,35 +1,36 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/userModel.js';
+import jwt from 'jsonwebtoken'
+import User from '../models/userModel.js'
 
+const protectedRoute = async (req, res, next) => {
+  try {
+    const token = req.cookies.token
 
-const verifyToken = (req, res, next) => {
-  const token = req.cookies.token; // Access the cookie using cookie-parser
-
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized: No token provided' })
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: 'Forbidden: Invalid token' })
+    if (!token) {
+      return res.status(401).json({ message: 'Unauthorized: No token provided' })
     }
-    req.user = decoded; // Add user payload to request object
-    next()
-  })
-}
 
-app.get('/profile', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
-})
-app.get('/chat', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
-})
-app.get('/post', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
-})
-app.get('/createRoom', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
-})
-app.post('/getUsers', verifyToken, (req, res) => {
-  res.status(200).json({ message: `Welcome ${req.user.email}! This is a protected route.` });
-})
+    // jwt.verify throws on invalid/expired tokens - no need for !decoded check
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    const user = await User.findById(decoded.id).select('-password')
+    console.log(user)
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    req.user = user
+    return next()
+  } catch (error) {
+    console.error('Error in protectedRoute middleware:', error.message)
+
+    // Distinguish between JWT errors (401) and other errors (500)
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Unauthorized: Invalid token' })
+    }
+
+    return res.status(500).json({ message: 'Internal server error' })
+  }
+};
+
+export default protectedRoute
+
