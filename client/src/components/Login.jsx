@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../configs/axios.js";
 import { useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
@@ -17,11 +17,11 @@ const Login = () => {
 
     try {
 
-      const response = await axios.post('http://localhost:3000/api/users/login', { username, password }, { withCredentials: true })
+      const response = await axiosInstance.post('/users/login', { username, password })
       // Assume response.data contains user info or a success flag
       if (response.status === 200) {
         setUser(response.data.user)
-        navigate('/')
+        navigate('/chats')
         console.log('Login Successful');
       } else {
         console.log('Login failed');

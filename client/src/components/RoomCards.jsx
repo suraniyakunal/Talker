@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import avatar from '../assets/images.jpg'
-import RoomPage from './RoomPage'
+import RoomPage from './RoomView'
 import { Link } from 'react-router-dom'
 
 
@@ -29,7 +29,7 @@ const RoomCards = ({ room }) => {
           </div>
 
         </div>
-        <Link to={`/rooms/${room.id}`} className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</Link>
+        <Link to={`/room-view/${room.id}`} className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</Link>
       </footer>
     </div>
   )

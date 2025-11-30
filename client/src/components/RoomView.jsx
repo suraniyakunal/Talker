@@ -1,4 +1,4 @@
-const RoomPage = () => {
+const RoomView = () => {
   return (
     <div className="w-80 h-80 bg-white text-white ">
       <h1>The speaker</h1>
@@ -12,4 +12,4 @@ const RoomPage = () => {
   )
 }
 
-export default RoomPage
+export default RoomView

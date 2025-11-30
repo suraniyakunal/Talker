@@ -1,4 +1,4 @@
-import axios from "axios"
+import axiosInstance from "../configs/axios.js"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 
@@ -12,7 +12,7 @@ const SignUp = () => {
   const handleSignUp = async (e) => {
     e.preventDefault()
     try {
-      const response = await axios.post('/api/users/signup', { username, email, password })
+      const response = await axiosInstance.post('/users/signup', { username, email, password })
 
       if (response.status === 201) {
         console.log("signup succefull", username)

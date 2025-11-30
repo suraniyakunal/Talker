@@ -1,5 +1,5 @@
 
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose'
 
 const conversationSchema = new Schema({
   participants: [{
@@ -21,7 +21,7 @@ const conversationSchema = new Schema({
   },
 }, {
   timestamps: true // Manages createdAt and updatedAt
-});
+})
 
 // Index participants for fast lookups by user ID
 conversationSchema.index({ participants: 1 })
