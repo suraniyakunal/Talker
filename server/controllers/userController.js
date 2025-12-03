@@ -18,7 +18,7 @@ const login = async (req, res) => {
 
   if (user) {
 
-    const isMatch = await user.matchPassword(password);
+    const isMatch = await user.matchPassword(password)
 
     if (isMatch) {
       generateToken(user._id, res) // Ensure generateToken is defined
