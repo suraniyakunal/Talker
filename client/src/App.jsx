@@ -14,35 +14,14 @@ import { AuthContext } from './auth/AuthContext.jsx'
 
 function App() {
 
-  const { user } = useContext(AuthContext)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { user, loading } = useContext(AuthContext)
+  const isAuthenticated = Boolean(user)
 
-  useEffect(() => {
-    // console.log(user)
-    const checkAuth = async () => {
-      try {
-        const response = await axiosInstance.get('/users/check')
-        if (response.status === 200) {
-          setIsAuthenticated(true)
-        } else {
-          setIsAuthenticated(false)
-        }
-      } catch {
-        setIsAuthenticated(false)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkAuth()
-  }, [])
-
-  if (loading) return <div>Loading...</div>
+  if (loading) return <div className='text-red-600'>Loading...</div>
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route path='/' element={<Navigate to='/chats' replace />} />
+        <Route path='/' element={isAuthenticated && <Navigate to='/chats' replace />} />
         <Route path='chats' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
         <Route path='chats/:userId' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
         <Route path='rooms' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
@@ -52,7 +31,7 @@ function App() {
         <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
       </Route>
 
-      <Route path='/login' element={!isAuthenticated ? <Login /> : <Navigate to='/chats' />} />
+      <Route path='/login' element={<Login />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

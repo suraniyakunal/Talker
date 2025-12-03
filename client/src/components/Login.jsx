@@ -1,9 +1,8 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import axiosInstance from "../configs/axios.js";
-import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
-import { AuthContext } from "../auth/AuthContext";
+import { useState, useContext } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import axiosInstance from "../configs/axios.js"
+import { AuthContext } from "../auth/AuthContext.jsx"
+
 
 const Login = () => {
 
@@ -16,21 +15,20 @@ const Login = () => {
     e.preventDefault()
 
     try {
+      const response = await axiosInstance.post('/users/login', { username, password });
 
-      const response = await axiosInstance.post('/users/login', { username, password })
-      // Assume response.data contains user info or a success flag
       if (response.status === 200) {
-        setUser(response.data.user)
-        navigate('/chats')
+        // Set user in global context
+        setUser(response.data);
+
         console.log('Login Successful');
+        navigate('/chats');
       } else {
         console.log('Login failed');
       }
-
     } catch (error) {
-      console.log("error in confirming the login credential", error)
+      console.log("error in confirming the login credential", error);
     }
-
     setUsername('')
     setPassword('')
 
