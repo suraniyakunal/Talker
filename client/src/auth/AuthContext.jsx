@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
     const globalAuthCheck = async () => {
       try {
         const authenticatedUser = await axiosInstance.get('/users/check');
-        console.log('Auth check response:', authenticatedUser.data.user); // ← FIXED logging
+        // console.log('Auth check response:', authenticatedUser.data.user); // ← FIXED logging
 
         // Set user if exists, otherwise null
         setUser(authenticatedUser.data.user || null);
