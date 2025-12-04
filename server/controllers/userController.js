@@ -53,11 +53,13 @@ const signUp = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, saltRounds)
 
-    const savedUser = await User.create({
+    const savedUser = new User({
       username,
       email,
       password: hashedPassword,  // Store hashed password correctly
     })
+
+    await savedUser.save()
 
     if (savedUser) {
       generateToken(savedUser._id, res)
