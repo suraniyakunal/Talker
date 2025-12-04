@@ -7,6 +7,7 @@ import { initializeSocketConnection } from './sockets/socketHandle.js'
 import dbContext from './controllers/dbConnection.js'
 import userRouter from './routes/userRoutes.js'
 import roomRouter from './routes/roomRoutes.js'
+import chatRouter from './routes/chatRoutes.js'
 
 dotenv.config()
 
@@ -34,6 +35,7 @@ initializeSocketConnection(server)
 //global routes
 app.use('/api/users', userRouter)
 app.use('/api/rooms', roomRouter)
+app.use('api/chats', chatRouter)
 
 const PORT = process.env.PORT || 3000
 
