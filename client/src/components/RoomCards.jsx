@@ -4,18 +4,18 @@ import RoomPage from './RoomView'
 import { Link } from 'react-router-dom'
 
 
-const RoomCards = ({ room }) => {
+const RoomCards = ({ title, username, room }) => {
 
   const [showParticularRoom, setShowParticularRoom] = useState(false)
 
   return (
     <div className="border rounded-lg text-white px-4 py-4 m-4 bg-gray-500/20 overflow-hidden shadow-md ">
       <div className="sticky m-1">
-        <h5 className='font-bold m-1'>Title</h5>
+        <h5 className='font-bold m-1'>{title}</h5>
       </div>
       <div className='p-1 m-1'>
         <img src={avatar} className="rounded-full size-10 object-cover" />
-        <h3 className='font-semibold'>kunal</h3>
+        <h3 className='font-semibold'>{username}</h3>
       </div>
 
       <footer className='flex items-center justify-between space-x-3 m-1'>
@@ -29,7 +29,7 @@ const RoomCards = ({ room }) => {
           </div>
 
         </div>
-        <Link to={`/room-view/${room.id}`} className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</Link>
+        <Link to={`/room-view/${room}`} className="bg-cyan-500/40 hover:bg-cyan-500/80 rounded-lg px-3 py-2">Join</Link>
       </footer>
     </div>
   )

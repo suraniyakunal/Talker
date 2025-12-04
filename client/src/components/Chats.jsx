@@ -22,8 +22,8 @@ const Chats = () => {
 
   const handleSendMessage = (e) => {
     e.preventDefault()
-    socket.on('message', (message) => {
-      console.log(message)
+    socket.on('sendMessage', (message) => {
+      // console.log(message)
       setRecieve(message)
     })
   }
@@ -42,6 +42,7 @@ const Chats = () => {
 
     fetchData()
   }, [])
+
 
 
   return (

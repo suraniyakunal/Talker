@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import { socketAuth } from './socketAuth.js'
 
 const initializeSocketConnection = (server) => {
   const io = new Server(server, {
@@ -9,20 +10,20 @@ const initializeSocketConnection = (server) => {
     }
   })
 
-  // *** You MUST add connection logic here ***
-  io.on('connection', (socket) => {
-    console.log(`A user connected: ${socket.id}`);
+  //Middleware
+  io.use(socketAuth)
 
-    // Add handlers for specific events your frontend sends
-    // socket.on('yourEvent', (data) => { ... });
+  //  connection logic 
+  io.on('connection', (socket) => {
+    console.log(`A user connected: ${socket.id}`)
+
+
 
     socket.on('disconnect', () => {
-      console.log('User disconnected');
-    });
-  });
+      console.log('User disconnected')
+    })
+  })
 
-  // Optional: Return 'io' if you need to use it elsewhere in your server.js
-  return io;
 }
 
 export { initializeSocketConnection }
