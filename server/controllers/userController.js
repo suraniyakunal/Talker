@@ -4,11 +4,15 @@ import bcrypt from 'bcryptjs'
 
 
 const logout = async (req, res) => {
-  try {
-    res.cookie('token', '', { maxAge: 0 })
-    res.status(200).json({ message: 'Logged out Successfully' })
-  } catch (error) {
-    console.log("Error in the lougout Controller", error.message)
+  const { request } = req.body
+  console.log(request)
+  if (request === 'yes') {
+    try {
+      res.cookie('token', '', { maxAge: 0 })
+      res.status(200).json({ message: 'Logged out Successfully' })
+    } catch (error) {
+      console.log("Error in the lougout Controller", error.message)
+    }
   }
 }
 

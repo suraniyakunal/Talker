@@ -36,6 +36,10 @@ const initializeSocketConnection = (server) => {
       socket.emit('getRooms', Rooms)
     })
 
+    socket.on('joinRoom', (room) => {
+      socket.join(room)
+    })
+
     socket.on('disconnect', () => {
       console.log('User disconnected')
     })
