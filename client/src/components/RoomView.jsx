@@ -1,4 +1,14 @@
+import { useSocket } from "../socket/SocketContext"
+import { useEffect, useState } from "react"
+
 const RoomView = () => {
+  const socket = useSocket()
+
+  useEffect(() => {
+    socket.on('joinRoom', (data) => {
+      console.log(data)
+    })
+  })
   return (
     <div className="w-full flex justify-center items-center text-white ">
       <div className="relative text-center w-2/3 border-2 h-full">
