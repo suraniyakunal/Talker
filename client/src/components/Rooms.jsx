@@ -14,7 +14,8 @@ const Rooms = () => {
     if (!socket) return
     socket.emit('getAllRooms')
 
-    socket.on('getRooms', (getAllRooms) => {
+    socket.on('getRooms', async (getAllRooms) => {
+      await getAllRooms
       setGetRooms(getAllRooms)
     })
 
@@ -33,7 +34,7 @@ const Rooms = () => {
       <div className="p-4 pt-8 overflow-y-auto h-[calc(100vh-4rem)]">
         {currentRoom === 'voiceRoom' &&
           (<div id="voiceRoom" className=" mt-8 grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 space-x-5">
-            {getRooms.map((room) => (<div key={room._id}><RoomCards room={room._id} title={room.title} username={room.owner} /></div>))}
+            {getRooms.map((room) => (<div key={room._id}><RoomCards roomId={room._id} title={room.title} username={room.owner} /></div>))}
           </div>
           )}
 

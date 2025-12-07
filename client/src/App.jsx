@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Login from './components/Login.jsx'
+import Signup from './components/SignUp.jsx'
 import NotFound from './components/NotFound.jsx'
 import Posts from './components/Posts.jsx'
 import Rooms from './components/Rooms.jsx'
@@ -25,14 +26,14 @@ function App() {
         <Route path='chats' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
         <Route path='chats/:userId' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
         <Route path='rooms' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
-        <Route path='room-view/:roomId' element={isAuthenticated ? <RoomView /> : <Navigate to='/login' />} />
-        <Route path='room/:userId' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
+        <Route path='rooms/:roomId' element={isAuthenticated ? <RoomView /> : <Navigate to='/login' />} />
         <Route path='createRoom' element={isAuthenticated ? <CreateRoom /> : <Navigate to='/login' />} />
         <Route path='posts' element={isAuthenticated ? <Posts /> : <Navigate to='/login' />} />
         <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
       </Route>
 
       <Route path='/login' element={<Login />} />
+      <Route path='/signup' element={<Signup />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

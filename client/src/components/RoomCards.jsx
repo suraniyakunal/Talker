@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSocket } from '../socket/SocketContext'
 
 
-const RoomCards = ({ title, username, room }) => {
+const RoomCards = ({ title, username, roomId }) => {
   const socket = useSocket()
   const navigate = useNavigate()
   const [showParticularRoom, setShowParticularRoom] = useState(false)
@@ -13,8 +13,11 @@ const RoomCards = ({ title, username, room }) => {
 
   const handleClick = async (e) => {
     e.preventDefault()
-    navigate(` / room - view / ${room}`)
-    socket.on('joinRoom', (room))
+    socket.emit('joinRoom', roomId)
+    socket.once('roomJoined', (message) => {
+      console.log(message)
+      navigate(`${roomId}`)
+    })
   }
   return (
     <div className="border rounded-lg text-white px-4 py-4 m-4 bg-gray-500/20 overflow-hidden shadow-md ">

@@ -1,34 +1,43 @@
 import { useState, useEffect, useContext } from "react"
+import { useNavigate } from "react-router-dom"
 import { useSocket } from '../socket/SocketContext.jsx'
 import { AuthContext } from '../auth/AuthContext.jsx'
 
 const CreateRoom = () => {
   const socket = useSocket()
+  const navigate = useNavigate()
   const { user } = useContext(AuthContext)
-  const [room, setRoom] = useState('')
+  const [roomType, setRoom] = useState('')
   const [input, setInput] = useState({
     owner: user,
-    type: room,
+    type: roomType,
     title: "",
     role: 'admin',
     description: "",
     participants: [user]
   })
 
-  const handleCreate = async (e) => {
+  const handleCreate = (e) => {
     e.preventDefault()
     socket.emit('createRoom', input)
+    socket.once('roomCreated', (data) => {
+      socket.emit('joinRoom', data)
+      socket.once('roomJoined', (response) => {
+        console.log(response)
+      })
+      navigate(`/rooms/${data}`)
+    })
   }
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInput((prev) => ({
       ...prev,
       [name]: value,
-    }));
+    }))
   }
   return (
     <form onSubmit={handleCreate} className="w-full h-full text-white p-8 flex flex-col justify-center items-center bg-amber-800" >
-      <select value={room} onChange={e => setRoom(e.target.value)}>
+      <select value={input.type} onChange={handleChange}>
         <option value='voiceroom'>VoiceRoom</option>
         <option value='liveroom'>LiveRoom</option>
       </select>

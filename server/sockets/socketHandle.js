@@ -19,25 +19,62 @@ const initializeSocketConnection = (server) => {
     console.log(`A user connected: ${socket.id}`)
 
     socket.on('createRoom', async (roomDetails) => {
-      console.log('room details are :', roomDetails)
-      const createRoom = new Room(roomDetails)
-      await createRoom.save()
-      if (!createRoom) {
-        socket.emit('roomError', { error: 'There is some error in saving he room Details' })
+      try {
+        const createdRoom = new Room(roomDetails)
+        await createdRoom.save()
+        if (!createdRoom) {
+          socket.emit('roomError', { error: 'There is some error in saving he room Details' })
+        }
+        // const findRoom = await Room.findById(createdRoom._id)
+        socket.to(createdRoom._id).emit('roomReady', { createdRoom, message: 'Room created Sucessfully' })
+        socket.emit('roomCreated', createdRoom._id)
+      } catch (error) {
+        console.log(error)
+        return
       }
-      console.log('on create room ', createRoom)
-      const findRoom = await Room.findById(createRoom._id)
-      console.log('the room has been created', findRoom)
     })
 
     socket.on('getAllRooms', async () => {
       const Rooms = await Room.find({})
-      console.log(Rooms)
       socket.emit('getRooms', Rooms)
     })
 
-    socket.on('joinRoom', (room) => {
-      socket.join(room)
+    let roomBroadcasters = new Map()
+
+    socket.on('joinRoom', (roomId) => {
+      socket.join(roomId)
+      console.log(`${socket.id} joined room: ${roomId}`); // Add this!
+
+      const braodcaster = roomBroadcasters.get(roomId)
+      if (braodcaster) {
+        socket.emit('broadcaster-ready', { broadcasterId: braodcaster })
+      }
+      socket.to(roomId).emit(`${socket.id} joined this room`)
+      socket.emit('roomJoined', { roomId, message: 'joined Sucessfully' })
+    })
+
+    socket.on('register-broadcaster', (roomId) => {
+      roomBroadcasters.set(roomId, socket.id)
+      socket.to(roomId).emit('broadcaster-ready', { broadcasterId: socket.id })
+    })
+
+    socket.on('voice-stream-offer', () => {
+      socket.to(data.targetId).emit('voice-stream-offer', data)
+    })
+
+    socket.on('voice-stream-answer', (data) => {
+      socket.to(data.targetId).emit('voice-stream-answer', data)
+    })
+
+    socket.on('voice-ice-candidate', (data) => {
+      socket.to(data.targetId).emit('voice-ice-candidate', data)
+    })
+
+    socket.on('leaveRoom', (roomId) => {
+      console.log('3. Server got leaveRoom:', roomId, 'from', socket.id)
+      socket.leave(roomId);
+      socket.to(roomId).emit('userLeft', { userId: socket.id, roomId })
+      socket.emit('leftRoom', { roomId, message: 'Left Successfully' })
     })
 
     socket.on('disconnect', () => {
