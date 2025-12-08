@@ -12,14 +12,14 @@ const RoomView = () => {
   const peerConnectionRef = useRef()
   const navigate = useNavigate()
   const { roomId } = useParams()
+  const [role, setRole] = useState('')
 
   useEffect(() => {
-    socket.emit('joinRoom', roomId)
+    socket.emit('joinRoom', { roomId }, { userId: user._id })
+    socket.once('roomJoined', async ({ room, role }) => {
+      setRole(role)
 
-    socket.once('roomJoined', async () => {
-      const userIsOwner = true
-
-      if (userIsOwner) {
+      if (role === 'speaker') {
         await startBroadcasting()
       } else {
         socket.on('broadcaster-ready', ({ broadcasterId }) => {
@@ -31,71 +31,54 @@ const RoomView = () => {
 
     return () => {
       localStreamRef.current?.getTracks().forEach(track => track.stop())
-      socket.emit('leaveRoom', roomId)
     }
-  }, [roomId])
+  }, [])
 
 
   const startBroadcasting = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      localStreamRef = stream
 
-      socket.emit('register-broadcaster', roomId)
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    localStreamRef.current = stream
 
-      setupBroadcasterPeerConnection(stream)
-    } catch (error) {
-      console.log('Mic access denied!')
-    }
-  }
-
-  const connectToBroadcaster = async (broadcasterId) => {
-    peerConnectionRef.current = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.1.google.com:19302' }]
-    })
-    peerConnectionRef.current.ontrack = (event) => {
-      remoteAudioRef.current.srcObject = event.streams[0]
-    }
-
-    socket.emit('request-stream', { broadcasterId, roomId })
-  }
-
-  const setupBroadcasterPeerConnection = (localSream) => {
     peerConnectionRef.current = new RTCPeerConnection({
       iceServers: [{ urls: 'stun:stun.1.google.com.19302' }]
     })
 
-    localSream.getTracks().forEach(track => {
-      peerConnectionRef.current.addTrack(track, localSream)
-    })
-
-    socket.on('request-stream', async ({ listenerId }) => {
-      const offer = await peerConnectionRef.current.createOffer()
-      await peerConnectionRef.current.setLocalDescription(offer)
-
-      socket.emit('voice-stream-offer', {
-        offer,
-        targetId: listenerId,
-        roomId
-      })
-    })
-
-    socket.on('voice-stream-answer', async ({ answer }) => {
-      await peerConnectionRef.current.setRemoteDescription(
-        new RTCPeerConnection(answer)
-      )
+    stream.getTracks().forEach(track => {
+      peerConnectionRef.current.addTrack(track, stream)
     })
 
     peerConnectionRef.current.onicecandidate = (event) => {
       if (event.candidate) {
         socket.emit('voice-ice-candidate', {
           candidate: event.candidate,
-          targetId: listener - Id
+          roomId
+        })
+      }
+    }
+
+    socket.on('register-broadcaster', roomId)
+  }
+
+
+  const createListenerPeerConnection = async () => {
+    peerConnectionRef.current = new RTCPeerConnection({
+      iceServers: { urls: 'stun:stun.1.google.com.19302' }
+    })
+
+    peerConnectionRef.current.ontrack = (event) => {
+      remoteAudioRef.current.srcObject = event.stream[0]
+    }
+
+    peerConnectionRef.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        socket.emit('voice-ice-candidate', {
+          candidate: event.candidate,
+          roomId
         })
       }
     }
   }
-
 
   const handleLeave = (e) => {
     e.preventDefault()
@@ -136,43 +119,7 @@ const RoomView = () => {
       </div>
     </div>
 
-      <div className="voice-room bg-green-500">
-        <h1>Room: {roomId}</h1>
-
-        {/* Local preview (owner only) */}
-        {localStreamRef.current && (
-          <audio
-            ref={localPreview => {
-              if (localPreview && localStreamRef.current) {
-                localPreview.srcObject = localStreamRef.current;
-              }
-            }}
-            autoPlay
-            muted
-          />
-        )}
-
-        {/* Remote audio (listeners) */}
-        <audio
-          ref={remoteAudioRef}
-          autoPlay
-        />
-
-        {/* Safe mute button */}
-        <button
-          onClick={() => {
-            const tracks = localStreamRef.current?.getTracks();
-            if (tracks && tracks[0]) {
-              tracks[0].enabled = !tracks[0].enabled;
-            }
-          }}
-        >
-          {(() => {
-            const tracks = localStreamRef.current?.getTracks();
-            return tracks && tracks[0] ? (tracks[0].enabled ? 'Mute' : 'Unmute') : 'Unmute';
-          })()}
-        </button>
-      </div>    </>)
+    </>)
 }
 
 export default RoomView

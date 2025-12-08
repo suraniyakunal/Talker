@@ -41,38 +41,35 @@ const initializeSocketConnection = (server) => {
 
     let roomBroadcasters = new Map()
 
-    socket.on('joinRoom', (roomId) => {
+    socket.on('joinRoom', async ({ roomId }, { userId }) => {
       socket.join(roomId)
+      const getRoom = await Room.findOne({ _id: roomId })
+      const isOwner = getRoom.owner.toString() === socket.userId
+      const isSpeaker = getRoom.speakers.some(id => id.toString() === socket.userId)
+      const role = isOwner || isSpeaker ? 'speaker' : 'listener'
+
       console.log(`${socket.id} joined room: ${roomId}`); // Add this!
 
-      const braodcaster = roomBroadcasters.get(roomId)
-      if (braodcaster) {
-        socket.emit('broadcaster-ready', { broadcasterId: braodcaster })
+      const broadcaster = roomBroadcasters.get(roomId)
+      if (broadcaster) {
+        socket.emit('broadcaster-ready', { broadcasterId: broadcaster })
       }
-      socket.to(roomId).emit(`${socket.id} joined this room`)
-      socket.emit('roomJoined', { roomId, message: 'joined Sucessfully' })
+      socket.to(roomId).emit('userJoined', `${socket.id} joined this room`)
+      socket.emit('roomJoined', { roomId, role, room: getRoom, message: 'joined Sucessfully' })
     })
 
-    socket.on('register-broadcaster', (roomId) => {
-      roomBroadcasters.set(roomId, socket.id)
-      socket.to(roomId).emit('broadcaster-ready', { broadcasterId: socket.id })
-    })
 
-    socket.on('voice-stream-offer', () => {
-      socket.to(data.targetId).emit('voice-stream-offer', data)
-    })
+    socket.on('leaveRoom', async (roomId) => {
+      console.log(' Server got leaveRoom:', roomId, 'from', socket.id)
+      socket.leave(roomId)
+      const getRoom = await Room.findOne({ _id: roomId })
 
-    socket.on('voice-stream-answer', (data) => {
-      socket.to(data.targetId).emit('voice-stream-answer', data)
-    })
-
-    socket.on('voice-ice-candidate', (data) => {
-      socket.to(data.targetId).emit('voice-ice-candidate', data)
-    })
-
-    socket.on('leaveRoom', (roomId) => {
-      console.log('3. Server got leaveRoom:', roomId, 'from', socket.id)
-      socket.leave(roomId);
+      if (!getRoom.owner.toString() === socket.userId.toString()) {
+        getRoom.listeners = getRoom.listeners.filter(userId => userId !== socket.userId)
+        if (getRoom.listeners) {
+          console.log(getRoom.listeners)
+        }
+      }
       socket.to(roomId).emit('userLeft', { userId: socket.id, roomId })
       socket.emit('leftRoom', { roomId, message: 'Left Successfully' })
     })

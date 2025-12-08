@@ -13,11 +13,7 @@ const RoomCards = ({ title, username, roomId }) => {
 
   const handleClick = async (e) => {
     e.preventDefault()
-    socket.emit('joinRoom', roomId)
-    socket.once('roomJoined', (message) => {
-      console.log(message)
-      navigate(`${roomId}`)
-    })
+    navigate(`${roomId}`)
   }
   return (
     <div className="border rounded-lg text-white px-4 py-4 m-4 bg-gray-500/20 overflow-hidden shadow-md ">

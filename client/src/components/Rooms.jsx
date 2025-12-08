@@ -12,15 +12,20 @@ const Rooms = () => {
 
   useEffect(() => {
     if (!socket) return
-    socket.emit('getAllRooms')
 
-    socket.on('getRooms', async (getAllRooms) => {
-      await getAllRooms
+    const fetchRooms = async () => {
+      socket.emit('getAllRooms')
+    }
+
+    const handleGetRooms = (getAllRooms) => {
       setGetRooms(getAllRooms)
-    })
+    }
+
+    fetchRooms()
+    socket.on('getRooms', handleGetRooms)
 
     return () => {
-      socket.off('getRooms')
+      socket.off('getRooms', handleGetRooms)
     }
   }, [])
   return (

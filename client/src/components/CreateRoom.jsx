@@ -14,17 +14,14 @@ const CreateRoom = () => {
     title: "",
     role: 'admin',
     description: "",
-    participants: [user]
+    speakers: [user],
+    listeners: []
   })
 
   const handleCreate = (e) => {
     e.preventDefault()
     socket.emit('createRoom', input)
     socket.once('roomCreated', (data) => {
-      socket.emit('joinRoom', data)
-      socket.once('roomJoined', (response) => {
-        console.log(response)
-      })
       navigate(`/rooms/${data}`)
     })
   }
