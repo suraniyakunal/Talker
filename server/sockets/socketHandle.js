@@ -250,7 +250,8 @@ const initializeSocketConnection = async (server) => {
           listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
           enableUdp: true,
           enableTcp: true,
-          preferUdp: true
+          preferUdp: true,
+          iceParameters
         });
         roomData.recvTransports.set(remoteProducerId, transport);
       }
