@@ -91,6 +91,12 @@ const RoomView = () => {
 
         sendTransport.current = device.current.createSendTransport(response.params);
 
+        // Send transport
+        sendTransport.current = device.current.createSendTransport({
+          ...response.params,
+          iceServers: config.iceServers  // ✅ Add STUN
+        });
+
         // Event handlers...
         sendTransport.current.on('connect', ({ dtlsParameters }, callback, errback) => {
           socket.emit('transport-connect', { dtlsParameters, roomId }, callback);
@@ -140,31 +146,47 @@ const RoomView = () => {
     }
   };
 
+  const config = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.1.google.com:19302' }
+    ]
+  };
 
 
 
   const createRecvTransport = async (remoteProducerId) => {
     console.log('🔄 Creating recv transport for:', remoteProducerId);
 
-    // PASS producerId to avoid duplicates
+    // ✅ FIX 1: Existing transport - GET and PASS it
+    if (recvTransports.current.has(remoteProducerId)) {
+      console.log('✅ Recv transport already exists');
+      const existingTransport = recvTransports.current.get(remoteProducerId);
+      return consumeRemoteAudio(remoteProducerId, existingTransport);  // ✅ PASS TRANSPORT
+    }
+
+    // Create new transport
     socket.emit('createWebRtcTransport', {
       sender: false,
       roomId,
       producerId: remoteProducerId
-    }, async ({ params }) => {
-      if (params.error) {
-        console.error('Recv transport error:', params.error);
+    }, async (response) => {
+      if (!response?.params) {
+        console.error('❌ No transport params:', response);
         return;
       }
 
-      if (recvTransports.current.has(remoteProducerId)) {
-        console.log('✅ Recv transport already exists');
-        return consumeRemoteAudio(remoteProducerId);
-      }
+      const transport = device.current.createRecvTransport({
+        ...response.params,  // Server params
+        iceServers: [        // ✅ STUN servers
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      });
+      recvTransports.current.set(remoteProducerId, transport);  // Store it
 
-      const transport = device.current.createRecvTransport(params);
-      recvTransports.current.set(remoteProducerId, transport);
 
+      // ✅ FIX 2: Setup connect handler BEFORE consuming
       transport.on('connect', ({ dtlsParameters }, callback, errback) => {
         socket.emit('transport-connect', {
           dtlsParameters,
@@ -173,6 +195,7 @@ const RoomView = () => {
         }, callback);
       });
 
+      // ✅ FIX 3: PASS the NEW transport
       await consumeRemoteAudio(remoteProducerId, transport);
     });
   };
@@ -186,7 +209,10 @@ const RoomView = () => {
           roomId
         }, resolve);
       });
-
+      if (!transport) {
+        console.error('❌ No transport');
+        return;
+      }
       if (response.error) throw new Error(response.error);
 
       const consumer = await transport.consume(response.params);

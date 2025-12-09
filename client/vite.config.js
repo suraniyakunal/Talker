@@ -10,6 +10,10 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    host: true,  // ✅ Allows 0.0.0.0
+    port: 5173,
+    cors: true,
+    strictPort: false,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',  // Your backend server URL and port
