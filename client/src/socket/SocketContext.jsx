@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client'
 
-const Socket_Url = 'http://localhost:3000'
+const Socket_Url = 'https://talker-bvax.onrender.com'
 
 const SocketContext = createContext()
 
