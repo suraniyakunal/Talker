@@ -17,7 +17,7 @@ const RoomView = () => {
   const localStreamRef = useRef(null)
 
   useEffect(() => {
-    socket.emit('joinRoom', { roomId }, { userId: user._id });
+    socket.emit('joinRoom', { roomId, userId: user._id });
 
 
     socket.once('roomJoined', async ({ rtpCapabilities, role }) => {
@@ -42,7 +42,7 @@ const RoomView = () => {
       }
 
       // 4. Get producers
-      socket.emit('getProducers', roomId);
+      socket.emit('getProducers', { roomId, userId: user._id });
     });
 
     // Handle incoming producers (new speakers)

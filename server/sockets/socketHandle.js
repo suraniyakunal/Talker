@@ -63,9 +63,7 @@ const initializeSocketConnection = async (server) => {
     })
 
 
-    socket.on('joinRoom', async (data, userData) => {
-      const { roomId } = data;
-      const { userId } = userData;
+    socket.on('joinRoom', async (roomId, userId) => {
 
       socket.join(roomId);
       const getRoom = await Room.findOne({ _id: roomId });
@@ -220,13 +218,24 @@ const initializeSocketConnection = async (server) => {
       callback({ id: producer.id });
     });
 
-    socket.on('getProducers', (roomId) => {
-      const roomState = rooms.get(roomId)
-      const producerIds = Array.from(roomState.producers.values()).map(p => p.id)
-      socket.emit('signalProducers', producerIds)
 
-    })
 
+    socket.on('getProducers', ({ roomId, userId }) => {
+      const roomState = rooms.get(roomId);
+      if (!roomState) {
+        socket.emit('signalProducers', []);
+        return;
+      }
+
+      const producerIds = [];
+      for (const [uid, producer] of roomState.producers.entries()) {
+        if (uid !== userId) {
+          producerIds.push(producer.id);
+        }
+      }
+
+      socket.emit('signalProducers', producerIds);
+    });
 
     socket.on('consume', async ({ remoteProducerId, rtpCapabilities, roomId }, callback) => {
       console.log('🟢 SERVER GOT consume:', { remoteProducerId, roomId });
