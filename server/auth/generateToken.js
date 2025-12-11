@@ -9,7 +9,7 @@ const generateToken = (id, res) => {
     secure: true,
     sameSite: 'none',
     maxAge: 3 * 60 * 60 * 1000,
-    partitioned,
+    partitioned: true,
     path: '/'
 
   })
