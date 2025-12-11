@@ -21,7 +21,6 @@ app.use(cookieParser())
 //global middleware
 app.use(cors({
   origin: 'https://talker-one.vercel.app',
-  methods: ["GET", "POST"],
   credentials: true
 }))
 

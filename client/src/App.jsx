@@ -32,8 +32,8 @@ function App() {
         <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
       </Route>
 
-      <Route path='/login' element={<Login />} />
-      <Route path='/signup' element={<Signup />} />
+      <Route path='/login' element={!isAuthenticated ? <Login /> : <Navigate to={'/chats'} />} />
+      <Route path='/signup' element={!isAuthenticated ? <Signup /> : <Navigate to={'/chats'} />} />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

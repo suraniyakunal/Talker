@@ -11,7 +11,7 @@ const Navbar = () => {
       z-10
       ">
       <div className="flex items-center gap-2">
-        <img src="/profile.jpg" alt="" className="rounded-full w-10 h-10" />
+        <img src="" alt="" className="rounded-full w-10 h-10" />
         <span className="font-semibold">Talker</span>
       </div>
       <div>
