@@ -16,30 +16,30 @@ const logout = async (req, res) => {
   }
 }
 
+
 const login = async (req, res) => {
-  const { username, password } = req.body
-  const user = await User.findOne({ username })
+  const { username, password } = req.body;
 
-  if (user) {
-
-    const isMatch = await user.matchPassword(password)
-
-    if (isMatch) {
-      generateToken(user._id, res) // Ensure generateToken is defined
-
-      return res.status(200).json({
-        _id: user._id,
-        user: user.username,
-        email: user.email,
-        profile_Pic: user.profile_Pic,
-        role: user.role,
-      })
-    }
-
-  } else {
-    res.status(401).json({ message: "invalid email or password" })
+  const user = await User.findOne({ username });
+  if (!user) {
+    return res.status(401).json({ message: 'invalid username or password' });
   }
-}
+
+  const isMatch = await user.matchPassword(password);
+  if (!isMatch) {
+    return res.status(401).json({ message: 'invalid username or password' });
+  }
+
+  generateToken(user._id, res); // sets httpOnly cookie
+
+  return res.status(200).json({
+    _id: user._id,
+    user: user.username,
+    email: user.email,
+    profile_Pic: user.profile_Pic,
+    role: user.role,
+  });
+};
 
 const signUp = async (req, res) => {
   const saltRounds = 10
