@@ -1,5 +1,3 @@
-
-// src/contexts/SocketContext.js (Update the file path as necessary)
 import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 

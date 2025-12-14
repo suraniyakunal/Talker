@@ -2,7 +2,7 @@
 import { createContext, useState, useEffect } from "react";
 import axiosInstance from "../configs/axios.js";
 
-export const AuthContext = createContext();
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -35,3 +35,4 @@ export function AuthProvider({ children }) {
   );
 }
 
+export { AuthContext }
