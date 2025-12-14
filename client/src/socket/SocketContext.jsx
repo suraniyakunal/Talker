@@ -22,7 +22,8 @@ export const SocketProvider = ({ children }) => {
         console.log("User found, connecting socket...");
 
         socketInstance = io(Socket_Url, {
-          withCredentials: true
+          withCredentials: true,
+          transports: ['websocket', 'polling']
           // Optionally add query: { userId: user._id } here if needed by backend
         });
 
