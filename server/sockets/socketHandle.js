@@ -107,7 +107,10 @@ const initializeSocketConnection = async (server) => {
 
     //create send transport for speaker
 
-
+    const iceServers = [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.1.google.com:19302' }
+    ];
     socket.on('createWebRtcTransport', async ({ sender, roomId, producerId }, callback) => {
       console.log('🟢 SERVER GOT createWebRtcTransport:', { sender, roomId, producerId });
 
@@ -145,7 +148,8 @@ const initializeSocketConnection = async (server) => {
           listenIps: [{ ip: '0.0.0.0', announcedIp: null }],
           enableUdp: true,
           enableTcp: true,
-          preferUdp: true
+          preferUdp: true,
+          iceServers: iceServers
         });
 
         // ENSURE roomData exists
