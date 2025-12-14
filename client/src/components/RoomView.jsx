@@ -17,7 +17,8 @@ const RoomView = () => {
   const localStreamRef = useRef(null)
 
   useEffect(() => {
-    socket.emit('joinRoom', roomId, user._id);
+    console.log(roomId)
+    socket.emit('joinRoom', { roomId });
 
 
     socket.once('roomJoined', async ({ rtpCapabilities, role }) => {
