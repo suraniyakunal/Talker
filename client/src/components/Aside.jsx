@@ -1,10 +1,21 @@
-import { Link } from "react-router-dom"
+import { useContext } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import axiosInstance from "../configs/axios"
+import AuthContext from '../auth/AuthContext.jsx'
 
 const Aside = () => {
+  const { user } = useContext(AuthContext)
+  const navigate = useNavigate()
   const handleLogOut = async () => {
     const request = 'yes'
-    axiosInstance.post('/users/logout', { request })
+    await axiosInstance.post('/users/logout', { request })
+
+    const response = await axiosInstance.get('/users/logout')
+
+    if (response.status === 200) {
+      navigate('/')
+      alert(`${user.username} is logged out`)
+    }
   }
   return (
     <div className="normal-text items-center justify-center flex">
