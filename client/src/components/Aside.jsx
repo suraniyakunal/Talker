@@ -1,7 +1,7 @@
 import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import axiosInstance from "../configs/axios"
-import AuthContext from '../auth/AuthContext.jsx'
+import { AuthContext } from '../auth/AuthContext.jsx'
 
 const Aside = () => {
   const { user } = useContext(AuthContext)
