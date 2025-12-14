@@ -3,7 +3,7 @@ import { loginHappend } from '../controllers/userController.js'
 
 export const socketAuth = (socket, next) => {
 
-  if (loginHappend) {
+  if (loginHappend === 'success') {
     try {
       // console.log('Raw cookies:', socket.request.headers.cookie); // Debug
 
