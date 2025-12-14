@@ -65,7 +65,7 @@ const initializeSocketConnection = async (server) => {
 
     socket.on('joinRoom', async ({ roomId }) => {
       socket.join(roomId);
-      const getRoom = await Room.findOne({ _id: roomId });
+      const getRoom = await Room.findById(roomId);
 
       console.log(getRoom)
       const isOwner = getRoom.owner.toString() === socket.userId;
