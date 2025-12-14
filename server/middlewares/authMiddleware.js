@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import User from '../models/userModel.js'
-import { loginHappend } from '../controllers/userController.js'
+import loginHappend from '../controllers/userController.js'
 
 const protectedRoute = async (req, res, next) => {
   if (loginHappend === 'success') {

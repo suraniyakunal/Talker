@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { loginHappend } from '../controllers/userController.js'
+import loginHappend from '../controllers/userController.js'
 
 export const socketAuth = (socket, next) => {
 
