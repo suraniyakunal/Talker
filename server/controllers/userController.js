@@ -16,7 +16,7 @@ const logout = async (req, res) => {
   }
 }
 
-let loginHappend
+
 const login = async (req, res) => {
   const { username, password } = req.body;
 
@@ -33,7 +33,6 @@ const login = async (req, res) => {
   if (user && isMatch) {
     generateToken(user._id, res); // sets httpOnly cookie
 
-    loginHappend = 'success'
     return res.status(200).json({
       _id: user._id,
       user: user.username,
@@ -123,4 +122,4 @@ const checkAuth = async (req, res) => {
   }
 }
 
-export default { loginHappend, login, signUp, getAllUsers, logout, updateProfile, checkAuth }
+export default { login, signUp, getAllUsers, logout, updateProfile, checkAuth }
