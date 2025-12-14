@@ -63,8 +63,8 @@ const initializeSocketConnection = async (server) => {
     })
 
 
-    socket.on('joinRoom', async (roomId, userId) => {
-
+    socket.on('joinRoom', async (data) => {
+      const { roomId, userId } = data
       socket.join(roomId);
       const getRoom = await Room.findOne({ _id: roomId });
 
