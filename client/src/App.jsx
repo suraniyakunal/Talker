@@ -10,8 +10,8 @@ import CreateRoom from './components/CreateRoom.jsx'
 import Profile from './components/Profile.jsx'
 import RoomView from './components/RoomView.jsx'
 import { useContext, useEffect, useState } from 'react'
-import axiosInstance from './configs/axios.js'
 import { AuthContext } from './auth/AuthContext.jsx'
+import { SocketProvider } from './socket/SocketContext.jsx'
 
 function App() {
 
@@ -20,23 +20,26 @@ function App() {
 
   if (loading) return <div className='text-red-600'>Loading...</div>
   return (
-    <Routes>
-      <Route element={<MainLayout />}>
-        <Route path='/' element={<Navigate to='/chats' replace />} />
-        <Route path='chats' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
-        <Route path='chats/:userId' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
-        <Route path='rooms' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
-        <Route path='rooms/:roomId' element={isAuthenticated ? <RoomView /> : <Navigate to='/login' />} />
-        <Route path='createRoom' element={isAuthenticated ? <CreateRoom /> : <Navigate to='/login' />} />
-        <Route path='posts' element={isAuthenticated ? <Posts /> : <Navigate to='/login' />} />
-        <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
-      </Route>
+    <SocketProvider>
+      <Routes>
+        <Route element={<MainLayout />}>
+          <Route path='/' element={<Navigate to='/chats' replace />} />
+          <Route path='chats' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
+          <Route path='chats/:userId' element={isAuthenticated ? <Chats /> : <Navigate to='/login' />} />
+          <Route path='rooms' element={isAuthenticated ? <Rooms /> : <Navigate to='/login' />} />
+          <Route path='rooms/:roomId' element={isAuthenticated ? <RoomView /> : <Navigate to='/login' />} />
+          <Route path='createRoom' element={isAuthenticated ? <CreateRoom /> : <Navigate to='/login' />} />
+          <Route path='posts' element={isAuthenticated ? <Posts /> : <Navigate to='/login' />} />
+          <Route path='profile' element={isAuthenticated ? <Profile /> : <Navigate to='/login' />} />
+        </Route>
 
-      <Route path='/login' element={!isAuthenticated ? <Login /> : <Navigate to={'/chats'} />} />
-      <Route path='/signup' element={!isAuthenticated ? <Signup /> : <Navigate to={'/chats'} />} />
+        <Route path='/login' element={!isAuthenticated ? <Login /> : <Navigate to={'/chats'} />} />
+        <Route path='/signup' element={!isAuthenticated ? <Signup /> : <Navigate to={'/chats'} />} />
 
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+
+    </SocketProvider>
   )
 }
 
