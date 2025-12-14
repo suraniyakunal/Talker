@@ -8,9 +8,7 @@ const Aside = () => {
   const navigate = useNavigate()
   const handleLogOut = async () => {
     const request = 'yes'
-    await axiosInstance.post('/users/logout', { request })
-
-    const response = await axiosInstance.get('/users/logout')
+    const response = await axiosInstance.post('/users/logout', { request })
 
     if (response.status === 200) {
       navigate('/')

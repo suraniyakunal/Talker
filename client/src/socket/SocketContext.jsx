@@ -1,20 +1,23 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client'
+import AuthContext from '../auth/AuthContext.jsx'
 
 const Socket_Url = 'https://talker-bvax.onrender.com'
 
 const SocketContext = createContext()
 
 export const SocketProvider = ({ children }) => {
+  const { user } = useContext(AuthContext)
   const [socket, setSocket] = useState(null)
-
+  const newSocket = useRef(null)
   useEffect(() => {
-    const newSocket = io(Socket_Url, {
-      withCredentials: true
-    });
+    if (user) {
+      newSocket = io(Socket_Url, {
+        withCredentials: true
+      });
 
-    setSocket(newSocket)
-
+      setSocket(newSocket)
+    }
     return () => {
       newSocket.disconnect()
     }
@@ -26,6 +29,7 @@ export const SocketProvider = ({ children }) => {
     </SocketContext.Provider>
   );
 };
+
 
 export const useSocket = () => useContext(SocketContext);
 
