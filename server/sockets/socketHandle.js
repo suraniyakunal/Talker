@@ -63,11 +63,11 @@ const initializeSocketConnection = async (server) => {
     })
 
 
-    socket.on('joinRoom', async (data) => {
-      const { roomId, userId } = data
+    socket.on('joinRoom', async ({ roomId }) => {
       socket.join(roomId);
       const getRoom = await Room.findOne({ _id: roomId });
 
+      console.log(getRoom)
       const isOwner = getRoom.owner.toString() === socket.userId;
       const isSpeaker = getRoom.speakers.some(id => id.toString() === socket.userId);
       const role = isOwner || isSpeaker ? 'speaker' : 'listener';
