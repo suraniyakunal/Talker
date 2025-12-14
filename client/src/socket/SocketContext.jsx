@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
 // 👇 Use the NAMED export from your AuthContext file
-import { AuthContext } from '../auth/AuthContext.jsx';
+import { AuthContext } from '../auth/AuthContext.jsx'
 
 const Socket_Url = 'https://talker-bvax.onrender.com';
 
