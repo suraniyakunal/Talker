@@ -25,7 +25,7 @@ const createWorker = async () => {
 
 const initializeSocketConnection = async (server) => {
   await createWorker()
-  const io = new Server(server, {
+  const io = new Server(await server, {
     cors: {
       origin: 'https://talker-one.vercel.app',
       methods: ["GET", "POST"],
