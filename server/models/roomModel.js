@@ -5,7 +5,7 @@ const roomSchema = new mongoose.Schema({
   title: { type: String, required: true },
   role: { type: String, enum: ['admin', 'moderator', 'guest'], default: 'guest' },
   speakers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  listeners: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  audience: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   description: { type: String, required: true },
 }, { timestamps: true })
 

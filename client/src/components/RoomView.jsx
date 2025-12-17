@@ -17,9 +17,7 @@ const RoomView = () => {
   const localStreamRef = useRef(null)
 
   useEffect(() => {
-    console.log(roomId)
     socket.emit('joinRoom', { roomId });
-
 
     socket.once('roomJoined', async ({ rtpCapabilities, role }) => {
       setRole(role);
@@ -72,7 +70,6 @@ const RoomView = () => {
       socket.emit('createWebRtcTransport', { sender: true, roomId }, (response) => {
         console.log('📨 Raw server response:', response);
 
-        // ✅ SAFE CHECK - response might be undefined
         if (!response) {
           reject(new Error('No server response'));
           return;
@@ -89,8 +86,6 @@ const RoomView = () => {
         }
 
         console.log('✅ Valid params received:', response.params.id);
-
-        sendTransport.current = device.current.createSendTransport(response.params);
 
         // Send transport
         sendTransport.current = device.current.createSendTransport({
@@ -179,10 +174,7 @@ const RoomView = () => {
 
       const transport = device.current.createRecvTransport({
         ...response.params,  // Server params
-        iceServers: [        // ✅ STUN servers
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
+        iceServers: config.iceServers
       });
       recvTransports.current.set(remoteProducerId, transport);  // Store it
 
