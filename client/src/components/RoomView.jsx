@@ -91,7 +91,7 @@ const RoomView = () => {
         sendTransport.current = device.current.createSendTransport({
           ...response.params,
           iceServers: config.iceServers  // ✅ Add STUN
-        });
+        })
 
         // Event handlers...
         sendTransport.current.on('connect', ({ dtlsParameters }, callback, errback) => {
@@ -102,13 +102,13 @@ const RoomView = () => {
           socket.emit('transport-produce', { kind, rtpParameters, roomId, userId: user._id }, (res) => {
             if (res?.id) callback({ id: res.id });
             else callback({ error: 'Produce failed' });
-          });
-        });
+          })
+        })
 
-        resolve();
-      });
-    });
-  };
+        resolve()
+      })
+    })
+  }
 
 
 
