@@ -12,6 +12,7 @@ import chatRouter from './routes/chatRoutes.js'
 dotenv.config()
 
 const app = express()
+app.set('trust proxy', 1):
 const uri = process.env.MONGODB_URL
 
 app.use(express.json())
