@@ -1,64 +1,49 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useContext } from 'react';
 import { io } from 'socket.io-client';
+import { useAuth } from '../auth/AuthContext.jsx'; // Verify path
 
-// 👇 Use the NAMED export from your AuthContext file
-import { AuthContext } from '../auth/AuthContext.jsx'
-
-const Socket_Url = 'https://talker-bvax.onrender.com';
+const Socket_Url = 'http://localhost:3000';
 
 const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
-  // 👇 Access user AND loading from your AuthContext
-  const { user, loading } = useContext(AuthContext);
+  const { user, loading } = useAuth();
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
+    // 1. If still loading auth, do nothing yet
+    if (loading) return;
+
     let socketInstance = null;
 
-    // 👇 CRITICAL FIX: Only run logic when loading is done AND check user status
-    if (!loading) {
-      if (user) {
-        console.log("User found, connecting socket...");
+    if (user) {
+      console.log('User found, connecting socket...');
 
-        socketInstance = io(Socket_Url, {
-          withCredentials: true,
-          transports: ['websocket', 'polling']
-          // Optionally add query: { userId: user._id } here if needed by backend
-        });
+      socketInstance = io(Socket_Url, {
+        withCredentials: true,
+        transports: ['websocket', 'polling'],
+        query: { userId: user._id }, // Helpful for backend mapping
+      });
 
-        setSocket(socketInstance);
+      setSocket(socketInstance);
 
-        // Optional: Add listeners
-        socketInstance.on('connect', () => console.log('Socket connected successfully'));
-        socketInstance.on('disconnect', () => console.log('Socket disconnected'));
-
-      } else {
-        // User is logged out (loading is done, no user object)
-        console.log("No authenticated user found, ensuring socket is disconnected.");
-        // We don't call setSocket(null) here because the return cleanup will handle the old instance
-      }
+      socketInstance.on('connect', () => console.log('Socket connected:', socketInstance.id));
+      socketInstance.on('connect_error', (err) => console.error('Socket error:', err));
     }
 
-    // 👇 CRITICAL FIX: The cleanup function relies on the local variable 'socketInstance' 
-    //    captured within this specific effect run's scope.
     return () => {
+      // Cleanup: Close connection if user logs out or component unmounts
       if (socketInstance) {
-        console.log("Cleaning up socket connection...");
+        console.log('Cleaning up socket connection...');
         socketInstance.disconnect();
+        setSocket(null); // Ensure state is cleared
       }
     };
-
-    // 👇 CRITICAL FIX: Depend on 'user' and 'loading'
   }, [user, loading]);
 
-  return (
-    // You were passing the 'socket' state directly as the value
-    <SocketContext.Provider value={socket}>
-      {children}
-    </SocketContext.Provider>
-  );
+  return <SocketContext.Provider value={{ socket }}>{children}</SocketContext.Provider>;
 };
 
-export const useSocket = () => useContext(SocketContext);
-
+export const useSocket = () => {
+  return useContext(SocketContext);
+};

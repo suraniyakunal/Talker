@@ -1,6 +1,5 @@
-
-import { createContext, useState, useEffect } from "react";
-import axiosInstance from "../configs/axios.js";
+import { createContext, useState, useEffect, useContext } from 'react';
+import axiosInstance from '../configs/axios.js';
 
 const AuthContext = createContext();
 
@@ -28,11 +27,9 @@ export function AuthProvider({ children }) {
   }, []);
 
   // CRITICAL: Export loading too
-  return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, setUser, loading }}>{children}</AuthContext.Provider>;
 }
 
-export { AuthContext }
+export const useAuth = () => {
+  return useContext(AuthContext);
+};

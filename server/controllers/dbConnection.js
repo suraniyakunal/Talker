@@ -1,13 +1,12 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const dbConnect = async (uri) => {
   try {
-    await mongoose.connect(uri)
-    console.log("The Database is connected")
-
+    await mongoose.connect(uri);
+    console.log('The Database is connected');
   } catch (error) {
-    console.log("There is some error with the Database", error)
-    process.exit(1)
+    console.log('There is some error with the Database', error);
+    process.exit(1);
   }
   let reconnectAttempts = 0;
   const MAX_RECONNECT_ATTEMPTS = 5;
@@ -25,6 +24,6 @@ const dbConnect = async (uri) => {
       process.exit(1);
     }
   });
-}
+};
 
-export default dbConnect
+export default dbConnect;

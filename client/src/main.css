@@ -21,12 +21,10 @@
 }
 
 .normal-text {
-
   color: var(--text);
 }
 
 .muted-text {
-
   color: var(--text-muted);
 }
 
