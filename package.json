@@ -1,0 +1,25 @@
+{
+  "name": "talker",
+  "version": "1.0.0",
+  "description": "This project is for creating a soical communication for people all over the world",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suraniyakunal/Talker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/suraniyakunal/Talker/issues"
+  },
+  "homepage": "https://github.com/suraniyakunal/Talker#readme",
+  "devDependencies": {
+    "prettier": "3.8.0"
+  }
+}

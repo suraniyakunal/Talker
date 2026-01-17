@@ -1,11 +1,9 @@
-
-import axios from "axios"
+import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: "https://talker-bvax.onrender.com/api", // your backend base URL
-  withCredentials: true,                // send cookies with requests
+  baseURL: import.meta.env.VITE_API_URL, // your backend base URL
+  withCredentials: true, // send cookies with requests
   timeout: 10000, // optional: request timeout in ms
-})
+});
 
-export default axiosInstance
-
+export default axiosInstance;

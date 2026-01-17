@@ -1,277 +1,188 @@
-import { useSocket } from "../socket/SocketContext"
-import { useEffect, useState, useContext, useRef } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { AuthContext } from "../auth/AuthContext"
-import * as mediasoupClient from 'mediasoup-client'
+import React, { useState, useEffect, useRef } from 'react';
 
 const RoomView = () => {
-  const socket = useSocket()
-  const { user } = useContext(AuthContext)
-  const navigate = useNavigate()
-  const { roomId } = useParams()
-  const [role, setRole] = useState('')
-  const device = useRef(null)
-  const sendTransport = useRef(null)
-  const recvTransports = useRef(new Map())
-  const audioElements = useRef(new Map())
-  const localStreamRef = useRef(null)
+  // --- INTERNAL STATE ---
+  const [isMuted, setIsMuted] = useState(false);
+  const [message, setMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState([
+    { id: 1, user: 'System', text: 'Welcome to the voice room! 🎤', isSystem: true },
+  ]);
 
+  // Mock data for UI
+  const speakers = [
+    { id: 1, name: 'Host Felix', isSpeaking: true, avatar: 'Felix' },
+    { id: 2, name: 'Sarah', isSpeaking: false, avatar: 'Sarah' },
+    { id: 3, name: 'Developer', isSpeaking: false, avatar: 'Dev' },
+  ];
+
+  const audienceCount = 45;
+  const chatEndRef = useRef(null);
+
+  // --- AUTO-SCROLL LOGIC ---
   useEffect(() => {
-    socket.emit('joinRoom', { roomId });
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
-    socket.once('roomJoined', async ({ rtpCapabilities, role }) => {
-      setRole(role);
-
-      // 1. Load device
-      device.current = new mediasoupClient.Device();
-      await device.current.load({ routerRtpCapabilities: rtpCapabilities });
-      console.log('✅ Device loaded');
-
-      if (role === 'speaker') {
-        try {
-          // 2. WAIT for transport to be ready
-          await createSendTransport();
-          console.log('✅ Transport ready, getting mic...');
-
-          // 3. NOW safe to get stream
-          await getLocalStream();
-        } catch (error) {
-          console.error('❌ Speaker setup failed:', error);
-        }
-      }
-
-      // 4. Get producers
-      socket.emit('getProducers', { roomId, userId: user._id });
-    });
-
-    // Handle incoming producers (new speakers)
-    socket.on('signalProducers', (producerIds) => {
-      console.log('Producers to consume:', producerIds);
-      producerIds.forEach(producerId => createRecvTransport(producerId));
-    });
-
-    socket.on('new-producer', ({ producerId }) => {
-      console.log('New producer:', producerId);
-      createRecvTransport(producerId);
-    });
-
-    return () => {
-      // Cleanup
-      localStreamRef.current?.getTracks().forEach(track => track.stop());
-      Object.values(audioElements.current).forEach(audio => audio.pause());
-    };
-  }, []);
-
-
-
-  const createSendTransport = () => {
-    return new Promise((resolve, reject) => {
-      console.log('🔄 Sending createWebRtcTransport...');
-      socket.emit('createWebRtcTransport', { sender: true, roomId }, (response) => {
-        console.log('📨 Raw server response:', response);
-
-        if (!response) {
-          reject(new Error('No server response'));
-          return;
-        }
-
-        if (response.error) {
-          reject(new Error(response.error));
-          return;
-        }
-
-        if (!response.params) {
-          reject(new Error('Invalid response format'));
-          return;
-        }
-
-        console.log('✅ Valid params received:', response.params.id);
-
-        // Send transport
-        sendTransport.current = device.current.createSendTransport({
-          ...response.params,
-          iceServers: config.iceServers  // ✅ Add STUN
-        })
-
-        // Event handlers...
-        sendTransport.current.on('connect', ({ dtlsParameters }, callback, errback) => {
-          socket.emit('transport-connect', { dtlsParameters, roomId }, callback);
-        });
-
-        sendTransport.current.on('produce', async ({ kind, rtpParameters }, callback, errback) => {
-          socket.emit('transport-produce', { kind, rtpParameters, roomId, userId: user._id }, (res) => {
-            if (res?.id) callback({ id: res.id });
-            else callback({ error: 'Produce failed' });
-          })
-        })
-
-        resolve()
-      })
-    })
-  }
-
-
-
-  const getLocalStream = async () => {
-    // ✅ GUARD CLAUSE - verify transport exists
-    if (!sendTransport.current) {
-      throw new Error('Send transport not ready');
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          sampleRate: 48000
-        }
-      });
-
-      const track = stream.getAudioTracks()[0];
-      if (!track) throw new Error('No audio track');
-
-      localStreamRef.current = stream;
-
-      // ✅ NOW SAFE - transport is guaranteed to exist
-      const { id } = await sendTransport.current.produce({ track });
-      console.log('✅ Audio producing with ID:', id);
-
-    } catch (error) {
-      console.error('❌ Mic failed:', error);
-      throw error; // Re-throw for caller to handle
-    }
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!message.trim()) return;
+    setChatMessages([
+      ...chatMessages,
+      {
+        id: Date.now(),
+        user: 'You',
+        text: message,
+        isSystem: false,
+      },
+    ]);
+    setMessage('');
   };
 
-  const config = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.1.google.com:19302' }
-    ]
-  };
+  // --- ICON COMPONENTS (INLINE SVGS) ---
+  const MicIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <line x1="12" x2="12" y1="19" y2="22" />
+    </svg>
+  );
 
-
-
-  const createRecvTransport = async (remoteProducerId) => {
-    console.log('🔄 Creating recv transport for:', remoteProducerId);
-
-    // ✅ FIX 1: Existing transport - GET and PASS it
-    if (recvTransports.current.has(remoteProducerId)) {
-      console.log('✅ Recv transport already exists');
-      const existingTransport = recvTransports.current.get(remoteProducerId);
-      return consumeRemoteAudio(remoteProducerId, existingTransport);  // ✅ PASS TRANSPORT
-    }
-
-    // Create new transport
-    socket.emit('createWebRtcTransport', {
-      sender: false,
-      roomId,
-      producerId: remoteProducerId
-    }, async (response) => {
-      if (!response?.params) {
-        console.error('❌ No transport params:', response);
-        return;
-      }
-
-      const transport = device.current.createRecvTransport({
-        ...response.params,  // Server params
-        iceServers: config.iceServers
-      });
-      recvTransports.current.set(remoteProducerId, transport);  // Store it
-
-
-      // ✅ FIX 2: Setup connect handler BEFORE consuming
-      transport.on('connect', ({ dtlsParameters }, callback, errback) => {
-        socket.emit('transport-connect', {
-          dtlsParameters,
-          roomId,
-          producerId: remoteProducerId
-        }, callback);
-      });
-
-      // ✅ FIX 3: PASS the NEW transport
-      await consumeRemoteAudio(remoteProducerId, transport);
-    });
-  };
-
-  const consumeRemoteAudio = async (remoteProducerId, transport) => {
-    try {
-      const response = await new Promise((resolve, reject) => {
-        socket.emit('consume', {
-          remoteProducerId,
-          rtpCapabilities: device.current.rtpCapabilities,
-          roomId
-        }, resolve);
-      });
-      if (!transport) {
-        console.error('❌ No transport');
-        return;
-      }
-      if (response.error) throw new Error(response.error);
-
-      const consumer = await transport.consume(response.params);
-      const { track } = consumer;
-
-      const audio = new Audio();
-      audio.srcObject = new MediaStream([track]);
-      await audio.play();
-
-      audioElements.current.set(remoteProducerId, audio);
-      console.log('✅ Playing remote audio:', remoteProducerId);
-    } catch (error) {
-      console.error('❌ Consume failed:', error);
-    }
-  };
-
-  const handleLeave = (e) => {
-    e.preventDefault()
-    socket.emit('leaveRoom', roomId)
-    socket.once('leftRoom', (data) => {
-      console.log(' Got leftRoom confirmation:', data)
-      navigate('/rooms')
-    })
-  }
+  const MutedIcon = () => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="2" x2="22" y1="2" y2="22" />
+      <path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2" />
+      <path d="M5 10v2a7 7 0 0 0 12 5" />
+      <path d="M15 9.34V5a3 3 0 0 0-5.68-1.33" />
+      <path d="M9 9v3a3 3 0 0 0 5.12 2.12" />
+      <line x1="12" x2="12" y1="19" y2="22" />
+    </svg>
+  );
 
   return (
-    <> <div className="w-full flex justify-center items-center text-white ">
-      <div className="relative text-center w-2/3 border-2 h-full">
-        <div className="h-40 grid w-full  p-4 gap-2 grid-cols-5">
-          {/* <div className="h-10"> */}
-          {/*   <h1>Speakers</h1> */}
-          {/* </div> */}
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"><img alt="j" /></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-          <div className="p-4 rounded-full bg-amber-50 h-16 w-16"></div>
-        </div>
-        <h1>The audience</h1>
-        <footer className="absolute bottom-5 left-10 right-10">
-          <button type="submit" className='py-3 px-3 m-2 bg-green-500 rounded-full'>mute</button>
-          <button onClick={handleLeave} type="submit" className='py-3 px-3 m-2 bg-green-500 rounded-full'>leave</button>
-          <button type="submit" className='py-3 px-3 m-2 bg-green-500 rounded-full'>Add</button>
+    <div className="flex h-full w-full bg-[#0B0B0B] text-zinc-100 overflow-hidden">
+      {/* 1. MAIN AREA */}
+      <div className="flex-1 flex flex-col border-r border-zinc-800">
+        <header className="p-6 border-b border-zinc-800">
+          <h1 className="text-xl font-bold">MERN Voice Room</h1>
+          <p className="text-xs text-zinc-500 uppercase tracking-tighter mt-1">
+            {speakers.length} Speakers • {audienceCount} Listening
+          </p>
+        </header>
 
-          <button onClick={async () => {
-            try {
-              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-              console.log('🎤 Mic test OK:', stream.getAudioTracks());
-              stream.getTracks().forEach(track => track.stop());
-            } catch (e) {
-              console.error('🎤 Mic test FAILED:', e);
-            }
-          }}>Test Mic</button>
+        {/* Scrollable Stage */}
+        <div className="flex-1 overflow-y-auto p-8 space-y-12">
+          {/* Speakers */}
+          <section>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
+              {speakers.map((s) => (
+                <div key={s.id} className="flex flex-col items-center">
+                  <div className="relative">
+                    {/* Speaking Indicator Pulse */}
+                    {s.isSpeaking && (
+                      <div className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-20"></div>
+                    )}
+                    <div
+                      className={`w-20 h-20 rounded-full relative z-10 overflow-hidden border-2 transition-all 
+                      ${s.isSpeaking ? 'border-green-500 scale-105 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'border-zinc-700'}`}
+                    >
+                      <img
+                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${s.avatar}`}
+                        alt="av"
+                      />
+                    </div>
+                  </div>
+                  <span className="mt-3 text-sm font-medium">{s.name}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Audience List (Simple Grid) */}
+          <section>
+            <h2 className="text-[10px] font-bold text-zinc-600 uppercase mb-4">Audience</h2>
+            <div className="grid grid-cols-5 sm:grid-cols-8 gap-4 opacity-60">
+              {Array.from({ length: 16 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700"
+                ></div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Bottom Controls */}
+        <footer className="p-4 bg-transparent border-t border-zinc-800 flex justify-center items-center gap-4">
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className={`p-4 rounded-2xl flex items-center gap-2 transition-all 
+              ${isMuted ? 'bg-red-500/10 text-red-500' : 'bg-zinc-800 hover:bg-zinc-700'}`}
+          >
+            {isMuted ? <MutedIcon /> : <MicIcon />}
+            <span className="text-sm font-bold">{isMuted ? 'Unmute' : 'Mute'}</span>
+          </button>
+
+          <button className="p-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 transition-all flex items-center gap-2">
+            {/* <Plus size={20} /> */}
+            <span className="text-sm font-semibold">Invite</span>
+          </button>
+
+          <button className="px-6 py-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold transition-colors">
+            Leave Stage
+          </button>
         </footer>
       </div>
-      <div className="text-center w-1/3 border-2 h-full">
-        <h1>Chats</h1>
-      </div>
+
+      {/* 2. CHAT SIDEBAR */}
+      <aside className="w-80 flex flex-col bg-zinc-900/20">
+        <div className="p-6 border-b border-zinc-800 font-bold text-sm tracking-wider">
+          LIVE CHAT
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 text-sm">
+          {chatMessages.map((m) => (
+            <div key={m.id} className="animate-in slide-in-from-bottom-1 duration-200">
+              <span className={`font-bold mr-2 ${m.isSystem ? 'text-blue-400' : 'text-zinc-400'}`}>
+                {m.user}:
+              </span>
+              <span className="text-zinc-300">{m.text}</span>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        <form onSubmit={handleSendMessage} className="p-4 bg-zinc-900/50">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Say something..."
+            className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-green-500"
+          />
+        </form>
+      </aside>
     </div>
+  );
+};
 
-    </>)
-}
-
-export default RoomView
+export default RoomView;

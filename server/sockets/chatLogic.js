@@ -1,0 +1,37 @@
+export const chatLogic = async (socket, io, userSocketMap) => {
+  socket.on('send_friend_request', async ({ sender, receiverId, requestId }) => {
+    console.log('sender ,receiver ,requestId', sender, receiverId, requestId);
+
+    if (!sender || !receiverId || !requestId) return console.log('data not found');
+
+    const receiveSocketId = userSocketMap.get(receiverId);
+
+    if (!receiveSocketId) return console.log('socket not found');
+
+    console.log('user map data', userSocketMap);
+
+    io.to(receiveSocketId).emit('new-request', {
+      message: `request from ${sender.username}`,
+      sender,
+      requestId,
+    });
+
+    console.log(`Sending to socket ID: ${receiveSocketId}`);
+  });
+
+  socket.on('join-chats', (room) => {
+    socket.join(room);
+    console.log(`User ${socket.id} joined: ${room}`);
+  });
+
+  socket.on('new-message', (newMessage) => {
+    const room = newMessage.conversationId;
+
+    socket.in(room).emit('message-received', newMessage);
+  });
+
+  socket.on('leave-chats', (room) => {
+    socket.leave(room);
+    console.log(`user ${socket.id} has left the room ${room}`);
+  });
+};

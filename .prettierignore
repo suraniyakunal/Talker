@@ -1,1 +1,28 @@
 
+# Dependency directories
+node_modules/
+
+# Build and production output
+dist/
+build/
+.next/
+out/
+
+# Version control and system files
+.git/
+.svn/
+.hg/
+.DS_Store
+
+# Environment and sensitive data
+.env
+.env.*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Documentation and temporary files
+coverage/
+*.log
+temp/
+

@@ -1,28 +1,27 @@
-import axiosInstance from "../configs/axios.js"
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import axiosInstance from '../configs/axios.js';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
-
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSignUp = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const response = await axiosInstance.post('/users/signup', { username, email, password })
+      const response = await axiosInstance.post('/users/signup', { username, email, password });
 
       if (response.status === 201) {
-        console.log("signup succefull", username)
-        navigate('/login')
-        alert(`User &{username} created`)
+        console.log('signup succefull', username);
+        navigate('/login');
+        alert(`User &{username} created`);
       }
     } catch (error) {
-      console.log("some error with the signup", error)
+      console.log('some error with the signup', error);
     }
-  }
+  };
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
       <div className="medium-black md:max-w-md rounded-lg py-8 ">
@@ -31,7 +30,9 @@ const SignUp = () => {
           <div>
             <input
               required
-              onChange={(e) => { setUsername(e.target.value) }}
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
               value={username}
               type="text"
               name="username"
@@ -39,12 +40,15 @@ const SignUp = () => {
               className="w-full normal-text 
               light-black px-3 py-2 
               rounded-md focus:outline-none
-              focus:ring-2 focus:ring-indigo-500" />
+              focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
           <div>
             <input
               required
-              onChange={(e) => { setEmail(e.target.value) }}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
               value={email}
               type="email"
               name="email"
@@ -52,12 +56,15 @@ const SignUp = () => {
               className="w-full normal-text 
               light-black px-3 py-2 
               rounded-md focus:outline-none
-              focus:ring-2 focus:ring-indigo-500" />
+              focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
           <div>
             <input
               required
-              onChange={(e) => { setPassword(e.target.value) }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
               value={password}
               type="password"
               name="password"
@@ -65,14 +72,22 @@ const SignUp = () => {
               className="w-full normal-text 
               light-black px-3 py-2 
               rounded-md focus:outline-none
-              focus:ring-2 focus:ring-indigo-500" />
+              focus:ring-2 focus:ring-indigo-500"
+            />
           </div>
-          <button type="submit" className="w-full p-2 rounded-lg bg-gray-300 hover:bg-gray-700 transition">SignUp</button>
+          <button
+            type="submit"
+            className="w-full p-2 rounded-lg bg-gray-300 hover:bg-gray-700 transition"
+          >
+            SignUp
+          </button>
         </form>
-        <h6 className='text-sm muted-text text-center pt-4'>have an account? <Link to='/login'>login</Link></h6>
+        <h6 className="text-sm muted-text text-center pt-4">
+          have an account? <Link to="/login">login</Link>
+        </h6>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SignUp
+export default SignUp;

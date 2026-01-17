@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
 
 export const socketAuth = (socket, next) => {
-
   try {
     // console.log('Raw cookies:', socket.request.headers.cookie); // Debug
 
@@ -10,7 +9,7 @@ export const socketAuth = (socket, next) => {
     // Fix: Handle BOTH 'token=' and 'accessToken=' formats
     let token = cookies
       ?.split('; ')
-      ?.find(row => row.startsWith('token='))
+      ?.find((row) => row.startsWith('token='))
       ?.split('=')[1];
 
     // Handle URL-encoded cookies (common issue)
@@ -34,4 +33,4 @@ export const socketAuth = (socket, next) => {
     console.error('Socket auth error:', error.message);
     next(new Error('Invalid token'));
   }
-}
+};
