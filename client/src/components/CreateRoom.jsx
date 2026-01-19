@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../socket/SocketContext.jsx';
 import { useAuth } from '../auth/AuthContext.jsx';
+import axiosInstance from '../configs/axios.js';
 
 const CreateRoom = () => {
   const socket = useSocket();
@@ -9,22 +10,26 @@ const CreateRoom = () => {
   const { user } = useAuth();
   const [roomType, setRoom] = useState('');
   const [input, setInput] = useState({
-    owner: user,
-    type: roomType,
+    host: user._id,
+    type: 'voiceroom',
     title: '',
-    role: 'admin',
+    role: 'host',
     description: '',
     speakers: [user],
     listeners: [],
   });
 
-  const handleCreate = (e) => {
+  const handleCreate = async (e) => {
     e.preventDefault();
-    socket.emit('createRoom', input);
-    socket.once('roomCreated', (data) => {
-      navigate(`/rooms/${data}`);
-    });
-  };
+
+    const { data } = await axiosInstance.post('/rooms/createRoom', { roomData: input })
+
+    if (data) {
+      socket.emit('join-room', data.room._id)
+      navigate(`/rooms/${data.room._id}`)
+    }
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInput((prev) => ({
@@ -37,17 +42,17 @@ const CreateRoom = () => {
       onSubmit={handleCreate}
       className="w-full h-full text-white p-8 flex flex-col justify-center items-center bg-amber-800"
     >
-      <select value={input.type} onChange={handleChange}>
-        <option value="voiceroom">VoiceRoom</option>
-        <option value="liveroom">LiveRoom</option>
-      </select>
+      {/* <select value={input.type} onChange={handleChange}> */}
+      {/*   <option value="voiceroom">VoiceRoom</option> */}
+      {/*   <option value="liveroom">LiveRoom</option> */}
+      {/* </select> */}
       <input
         required
         type="text"
         value={input.title}
         onChange={handleChange}
         name="title"
-        placeholder="topic"
+        placeholder="title"
         className="px-4 py-3 m-2"
       />
       <input

@@ -1,25 +1,37 @@
 import express from 'express';
 import Room from '../models/roomModel.js';
 
-const createRoom = async (req, res) => {
-  const roomData = req.body;
-  if (!roomData) {
-    res.status(401).json({ message: 'the room data is not received' });
-  }
+const createRoom = async (req, res, next) => {
   try {
-    console.log('room data is :', roomData.title, roomData.description, roomData.owner);
-    const create = new Room(roomData);
-    await create.save();
-    res.status(201).json({ message: 'The is created', room: create._id });
-    if (!done) {
-      res.status(401).json({ message: 'the room cannot be created' });
-    }
-    console.log(create);
-  } catch (error) {
-    console.log(error);
-  }
+    const { roomData } = req.body;
 
-  res.status(201).json({ message: 'the room is created' });
+    // 1. Validate roomData and STOP execution if missing
+    if (!roomData) {
+      return res.status(400).json({ message: 'the room data is not received' });
+    }
+
+    console.log('room data is:', roomData.title, roomData.description, roomData.host);
+
+    // 2. Room.create handles instantiation AND saving in one step
+    const createdRoom = await Room.create({
+      host: roomData.host,
+      type: roomData.type,
+      title: roomData.title,
+      description: roomData.description,
+      speakers: roomData.speakers
+    });
+
+    // 3. Send final success response and RETURN
+    return res.status(201).json({
+      message: 'The room is created',
+      room: createdRoom
+    });
+
+  } catch (error) {
+    console.error("Room creation failed:", error);
+    // 4. Pass errors to your global error middleware
+    return next(error);
+  }
 };
 
 const getAllRooms = async (req, res) => {

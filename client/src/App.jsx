@@ -28,7 +28,7 @@ function App() {
 
   return (
     <SocketProvider>
-      <Suspense fallback={PageLoader}>
+      <Suspense fallback={PageLoader()}>
         <Routes>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Navigate to="/chats" replace />} />
@@ -40,7 +40,7 @@ function App() {
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms/:roomId" element={user ? <RoomView /> : <Navigate to="/login" />} />
-            <Route path="createRoom" element={user ? <CreateRoom /> : <Navigate to="/login" />} />
+            <Route path="rooms/createRoom" element={user ? <CreateRoom /> : <Navigate to="/login" />} />
             <Route path="posts" element={user ? <Posts /> : <Navigate to="/login" />} />
             <Route path="profile" element={user ? <Profile /> : <Navigate to="/login" />} />
           </Route>

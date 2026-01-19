@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import { useSocket } from '../socket/SocketContext.jsx'
 
 const RoomView = () => {
   // --- INTERNAL STATE ---
@@ -7,6 +9,24 @@ const RoomView = () => {
   const [chatMessages, setChatMessages] = useState([
     { id: 1, user: 'System', text: 'Welcome to the voice room! 🎤', isSystem: true },
   ]);
+  const roomId = useParams()
+  const { socket } = useSocket()
+
+  useEffect(() => {
+    const fetchRoom = async () => {
+      if (!roomId || !socket) return
+      socket.emit('join-room', roomId)
+    }
+
+    fetchRoom()
+
+    return () => {
+      if (socket && roomId) {
+        socket.emit('leave-room', roomId)
+      }
+      socket.off('join-room')
+    }
+  }, [socket, roomId])
 
   // Mock data for UI
   const speakers = [
@@ -77,6 +97,7 @@ const RoomView = () => {
       <line x1="12" x2="12" y1="19" y2="22" />
     </svg>
   );
+
 
   return (
     <div className="flex h-full w-full bg-[#0B0B0B] text-zinc-100 overflow-hidden">

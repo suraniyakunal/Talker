@@ -1,3 +1,3 @@
 # Talker
 
-This project is for creating a soical communication for people all over the world
+This project is for creating a social communication for people all over the world
