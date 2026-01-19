@@ -20,8 +20,8 @@ const RoomCards = ({
 
   const handleClick = async (e) => {
     e.preventDefault();
-    navigate(`${room.id}`);
-  };
+    navigate(`${roomId}`);
+  }
   // --- INLINE SVGS ---
   const UsersIcon = () => (
     <svg
@@ -79,15 +79,13 @@ const RoomCards = ({
       key={roomId}
       className="group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 hover:bg-zinc-900/60 transition-all cursor-pointer relative overflow-hidden"
     >
-      {/* Live Indicator */}
-      {isLive && (
-        <div className="absolute top-0 right-0 p-3">
-          <span className="flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-          </span>
-        </div>
-      )}
+
+      <div className="absolute top-0 right-0 p-3">
+        <span className="flex h-2 w-2">
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        </span>
+      </div>
+
 
       {/* Room Info */}
       <div className="mb-4">
@@ -131,7 +129,7 @@ const RoomCards = ({
             </div>
           )}
         </div>
-        <button className="text-xs font-bold text-zinc-400 group-hover:text-white transition-colors">
+        <button type='button' onClick={handleClick} className="text-xs font-bold text-zinc-400 group-hover:text-white transition-colors">
           Join Room →
         </button>
       </div>

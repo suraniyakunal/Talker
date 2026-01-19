@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import RoomCards from './RoomCards';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSocket } from '../socket/SocketContext.jsx';
 import axiosInstance from '../configs/axios.js';
 
@@ -8,6 +8,7 @@ const Rooms = () => {
   const [currentRoom, setCurrentRoom] = useState('voiceRoom');
   const [getRooms, setGetRooms] = useState([]);
   const socket = useSocket();
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!socket) return;
@@ -56,6 +57,11 @@ const Rooms = () => {
     },
   ]);
 
+  const handleClick = (e) => {
+    e.preventDefault()
+    navigate('createRoom')
+  }
+
   return (
     <div className="w-full h-full text-white">
       <div className="flex z-20 fixed left-50 right-50 items-center justify-center px-3 space-x-3 py-2">
@@ -88,7 +94,7 @@ const Rooms = () => {
                 <h2 className="text-2xl font-black text-white tracking-tight">Active Rooms</h2>
                 <p className="text-zinc-500 text-sm">Join a conversation or start your own</p>
               </div>
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+              <button onClick={handleClick} className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-900/20 active:scale-95">
                 + Start Room
               </button>
             </div>
