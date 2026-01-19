@@ -49,8 +49,8 @@ const initializeSocketConnection = async (server) => {
 
     socket.on('disconnect', () => {
       console.log('🧹 Full cleanup for:', socket.id);
-    });
-  });
-};
+    })
+  })
+}
 
 export { initializeSocketConnection };
