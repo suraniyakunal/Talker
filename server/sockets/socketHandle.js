@@ -45,7 +45,7 @@ const initializeSocketConnection = async (server) => {
       userSocketMap.set(userId, socket.id);
     }
     chatLogic(socket, io, userSocketMap);
-    voiceRoomLogic(socket);
+    voiceRoomLogic(socket, worker, userSocketMap);
 
     socket.on('disconnect', () => {
       console.log('🧹 Full cleanup for:', socket.id);

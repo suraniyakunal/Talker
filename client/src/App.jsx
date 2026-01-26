@@ -33,10 +33,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Navigate to="/chats" replace />} />
             <Route path="chats" element={user ? <Chats /> : <Navigate to="/login" />} />
-            <Route
-              path="chats/:conversationId"
-              element={user ? <Chats /> : <Navigate to="/login" />}
-            />{' '}
+            <Route path="chats/:conversationId" element={user ? <Chats /> : <Navigate to="/login" />} />
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms/:roomId" element={user ? <RoomView /> : <Navigate to="/login" />} />

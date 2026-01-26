@@ -21,41 +21,8 @@ const Rooms = () => {
     };
 
     fetchData();
-  }, []);
+  }, [socket]);
 
-  // --- MOCK DATA ---
-  const [rooms] = useState([
-    {
-      id: 1,
-      title: 'MERN Stack Architecture 2026',
-      host: 'Felix Dev',
-      category: 'Technology',
-      participants: 124,
-      speakers: ['Felix', 'Sarah', 'Dev_Mike'],
-      isLive: true,
-      isPrivate: false,
-    },
-    {
-      id: 2,
-      title: 'Late Night Coding & Chill ☕',
-      host: 'Sarah_JS',
-      category: 'Social',
-      participants: 85,
-      speakers: ['Sarah', 'John'],
-      isLive: true,
-      isPrivate: true,
-    },
-    {
-      id: 3,
-      title: 'WebRTC vs Mediasoup Deep Dive',
-      host: 'Backend_Pro',
-      category: 'Engineering',
-      participants: 256,
-      speakers: ['Pro', 'Alice', 'Bob'],
-      isLive: true,
-      isPrivate: false,
-    },
-  ]);
 
   const handleClick = (e) => {
     e.preventDefault()
@@ -101,16 +68,14 @@ const Rooms = () => {
 
             {/* 2. ROOMS GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {rooms?.map((room) => (
+              {getRooms?.map((room) => (
                 <RoomCards
-                  key={room.id}
-                  isLive={room.isLive}
-                  roomId={room.id}
+                  key={room._id}
+                  roomId={room._id}
                   title={room.title}
-                  category={room.category}
                   host={room.host}
                   participants={room.participants}
-                  speakers={room.speakers}
+                  speakers={room.speaker}
                   isPrivate={room.isPrivate}
                 />
               ))}
