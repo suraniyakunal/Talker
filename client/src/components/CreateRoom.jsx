@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 import axiosInstance from '../configs/axios.js';
 
 const CreateRoom = () => {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [roomType, setRoom] = useState('');
@@ -24,10 +24,8 @@ const CreateRoom = () => {
 
     const { data } = await axiosInstance.post('/rooms/createRoom', { roomData: input })
 
-    if (data) {
-      socket.emit('join-room', data.room._id)
-      navigate(`/rooms/${data.room._id}`)
-    }
+    socket.emit('join-room', { roomId: data.room._id })
+    navigate(`/rooms/${data.room._id}`)
   }
 
   const handleChange = (e) => {

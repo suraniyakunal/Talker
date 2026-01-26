@@ -8,7 +8,12 @@ import dbContext from './controllers/dbConnection.js';
 import userRouter from './routes/userRoutes.js';
 import roomRouter from './routes/roomRoutes.js';
 import chatRouter from './routes/chatRoutes.js';
-import { loadEnvFile } from 'process';
+import './models/userModel.js';
+import './models/roomModel.js';
+import './models/conversationModel.js'
+import './models/friendshipModel.js'
+import './models/messageModel.js'
+
 
 // loadEnvFile('.env.dev')
 dotenv.config('.env.dev');

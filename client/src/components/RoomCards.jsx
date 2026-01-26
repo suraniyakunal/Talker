@@ -89,9 +89,7 @@ const RoomCards = ({
 
       {/* Room Info */}
       <div className="mb-4">
-        <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded">
-          {category}
-        </span>
+
         <h3 className="text-lg font-bold text-white mt-2 leading-tight group-hover:text-blue-400 transition-colors">
           {title}
         </h3>

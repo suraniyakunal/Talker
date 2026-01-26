@@ -6,10 +6,6 @@ export const chatLogic = async (socket, io, userSocketMap) => {
 
     const receiveSocketId = userSocketMap.get(receiverId);
 
-    if (!receiveSocketId) return console.log('socket not found');
-
-    console.log('user map data', userSocketMap);
-
     io.to(receiveSocketId).emit('new-request', {
       message: `request from ${sender.username}`,
       sender,
@@ -26,7 +22,6 @@ export const chatLogic = async (socket, io, userSocketMap) => {
 
   socket.on('new-message', (newMessage) => {
     const room = newMessage.conversationId;
-
     socket.in(room).emit('message-received', newMessage);
   });
 
