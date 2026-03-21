@@ -5,13 +5,21 @@ const roomState = new Map()
 const roomRouter = new Map()
 const transportMap = new Map()
 
-const voiceRoomLogic = async (socket, worker) => {
+// Helper to get a populated room object
+const getPopulatedRoom = (roomId) =>
+  Room.findById(roomId)
+    .populate('host', 'username profile_Pic')
+    .populate('speaker', 'username profile_Pic')
+    .populate('listener', 'username profile_Pic')
+
+const voiceRoomLogic = async (socket, worker, userSocketMap) => {
 
   const ensureRoom = (roomId) => {
     if (!roomState.has(roomId)) {
       roomState.set(roomId, {
         speakers: new Set(),
         listeners: new Set(),
+        pendingRequests: new Map(), // userId -> { user, socketId }
       })
     }
     return roomState.get(roomId)
@@ -23,7 +31,6 @@ const voiceRoomLogic = async (socket, worker) => {
   }
 
   const getOrCreateRouter = async (roomId) => {
-
     if (roomRouter.has(roomId)) return roomRouter.get(roomId)
 
     const mediaCodecs = [{
@@ -31,133 +38,279 @@ const voiceRoomLogic = async (socket, worker) => {
       mimeType: 'audio/opus',
       clockRate: 48000,
       channels: 2,
-    },]
+    }]
 
     const router = await worker.createRouter({ mediaCodecs })
     roomRouter.set(roomId, router)
-
     return router
   }
 
+  // ─── CREATE ROOM (called when host creates) ───────────────────────────────
   socket.on('create-voiceroom', async (roomId) => {
     await getOrCreateRouter(roomId)
   })
 
+  // ─── JOIN ROOM ────────────────────────────────────────────────────────────
   socket.on('join-room', async ({ roomId, user, asSpeaker }, callback) => {
-
     try {
+      if (!roomId || !user) return callback?.({ ok: false, error: 'Missing data' })
 
-      if (!roomId || !user) return
+      const room = await Room.findById(roomId)
+      if (!room) return callback?.({ ok: false, error: 'Room not found' })
 
-      const roomcheck = ensureRoom(roomId)
+      const isHost = room.host.toString() === user._id.toString()
+
+      // Check if already in any role (handle reconnects gracefully)
+      const isAlreadySpeaker = room.speaker.some(id => id.toString() === user._id.toString())
+      const isAlreadyListener = room.listener.some(id => id.toString() === user._id.toString())
 
       socket.join(roomId)
+      // socket.userId is already set by socketAuth middleware from the JWT
 
-      const room = await Room.findById(roomId);
-      const ishost = room.host.toString() === user._id.toString();
-      if (ishost) {
-        // If it's the host rejoining, we don't need to add them to any arrays
-        // They are already the 'host' in the DB.
-        console.log(`Host ${user.username} reconnected.`);
-      }
-      if (!room) {
-        return callback({ ok: false, error: 'room not found in database' });
-      }
+      const state = ensureRoom(roomId)
 
+      let updatedRoom
 
-      // 1. Determine the actual role being used
-      let actualRole = "listener";
-      if (ishost || asSpeaker) {
-        actualRole = "speaker";
-      }
+      if (isHost) {
+        // Host: just join the socket room, don't mutate DB arrays
+        state.speakers.add(socket.id)
+        console.log(`🎙️ Host "${user.username}" joined room ${roomId}`)
+        updatedRoom = await getPopulatedRoom(roomId)
 
-      // 2. Set Memory State
-      if (ishost || asSpeaker) {
-        if (!ishost && !canBecomeSpeaker(roomId)) {
-          return callback({ ok: false, error: 'max speakers reached' });
+      } else if (asSpeaker || isAlreadySpeaker) {
+        if (!canBecomeSpeaker(roomId) && !isAlreadySpeaker) {
+          return callback?.({ ok: false, error: 'Max speakers reached (8)' })
         }
-        roomcheck.speakers.add(socket.id);
-      } else {
-        roomcheck.listeners.add(socket.id);
-      }
+        state.speakers.add(socket.id)
 
-      let updatedroom
-
-
-      if (ishost) {
-        // host: don't update arrays, just populate and return
-        updatedroom = await Room.findById(roomId)
-          .populate('host', 'username profile_Pic')
-          .populate('speaker', 'username profile_Pic')
-          .populate('speaker', 'username profile_Pic')
-      } else {
-        // non-host: add to either speaker or listener array
-        const updatefield = asSpeaker ? { speaker: user._id } : { listener: user._id };
-        updatedroom = await Room.findByIdAndUpdate(
+        // Only add to DB if not already there
+        updatedRoom = await Room.findByIdAndUpdate(
           roomId,
-          { $addtoset: updatefield },
+          { $addToSet: { speaker: user._id }, $pull: { listener: user._id } },
           { new: true }
         )
           .populate('host', 'username profile_Pic')
           .populate('speaker', 'username profile_Pic')
           .populate('listener', 'username profile_Pic')
+
+        console.log(`🎤 Speaker "${user.username}" joined room ${roomId}`)
+
+      } else {
+        // Listener
+        state.listeners.add(socket.id)
+
+        updatedRoom = await Room.findByIdAndUpdate(
+          roomId,
+          { $addToSet: { listener: user._id } },
+          { new: true }
+        )
+          .populate('host', 'username profile_Pic')
+          .populate('speaker', 'username profile_Pic')
+          .populate('listener', 'username profile_Pic')
+
+        console.log(`👂 Listener "${user.username}" joined room ${roomId}`)
       }
 
-      socket.to(roomId).emit('room-data-update', 'host speaker listener');
+      // Broadcast updated room data to everyone else
+      socket.to(roomId).emit('room-data-update', updatedRoom)
 
-      console.log(`✅ ${user.username} joined ${roomId} as ${ishost ? 'Host' : actualRole}`)
-
-      callback({ ok: true, roomdata: updatedroom })
+      callback?.({ ok: true, roomdata: updatedRoom })
 
     } catch (error) {
-      console.error("join room error:", error);
-      callback({ ok: false, error: 'internal server error' })
+      console.error("join-room error:", error)
+      callback?.({ ok: false, error: 'Internal server error' })
     }
-
   })
 
 
+  // ─── LEAVE ROOM (non-host) ────────────────────────────────────────────────
   socket.on('voiceroom:leave-room', async ({ roomId }) => {
     try {
-      // 1. Leave the Socket.io room
-      socket.leave(roomId);
+      socket.leave(roomId)
 
-      // 2. Clean up Mediasoup server-side transports
-      const entry = transportMap.get(socket.id);
+      // Clean up mediasoup transports
+      const entry = transportMap.get(socket.id)
       if (entry) {
-        if (entry.sendTransport) entry.sendTransport.close();
-        if (entry.recvTransport) entry.recvTransport.close();
-        transportMap.delete(socket.id);
+        if (entry.sendTransport) entry.sendTransport.close()
+        if (entry.recvTransport) entry.recvTransport.close()
+        transportMap.delete(socket.id)
       }
 
-      // 3. Remove user from MongoDB
+      // Remove from DB
       const updatedRoom = await Room.findByIdAndUpdate(
         roomId,
         { $pull: { listener: socket.userId, speaker: socket.userId } },
         { new: true }
-      ).populate('host speaker listener', '-password')      // 4. Notify others in the room
-      socket.to(roomId).emit('room-data-update', updatedRoom);
+      )
+        .populate('host', 'username profile_Pic')
+        .populate('speaker', 'username profile_Pic')
+        .populate('listener', 'username profile_Pic')
 
-      // 5. Clean up memory state
-      const room = roomState.get(roomId);
-      if (room) {
-        room.speakers.delete(socket.id);
-        room.listeners.delete(socket.id);
+      // Notify others
+      socket.to(roomId).emit('room-data-update', updatedRoom)
+
+      // Clean up memory state
+      const state = roomState.get(roomId)
+      if (state) {
+        state.speakers.delete(socket.id)
+        state.listeners.delete(socket.id)
       }
 
-      console.log(`User ${socket.userId} left room ${roomId}`);
+      console.log(`🚪 User ${socket.userId} left room ${roomId}`)
     } catch (error) {
-      console.error("Leave Room Error:", error);
+      console.error("voiceroom:leave-room error:", error)
     }
-  });
+  })
 
-  // RTP Capabilities for client
+
+  // ─── HOST CLOSES ROOM ─────────────────────────────────────────────────────
+  socket.on('voiceroom:close-room', async ({ roomId }) => {
+    try {
+      const room = await Room.findById(roomId)
+      if (!room) return
+
+      const isHost = room.host.toString() === (socket.userId || '')
+      if (!isHost) return // Only host can close the room
+
+      // Notify ALL participants in the socket room that it's closed
+      // This will cause clients to navigate away
+      socket.to(roomId).emit('room-closed', { roomId, message: 'The host has ended the room.' })
+
+      // Clean up mediasoup router
+      if (roomRouter.has(roomId)) {
+        const router = roomRouter.get(roomId)
+        router.close()
+        roomRouter.delete(roomId)
+      }
+
+      // Clean up memory state
+      roomState.delete(roomId)
+
+      // Delete from DB
+      await Room.findByIdAndDelete(roomId)
+
+      console.log(`🗑️ Room ${roomId} closed by host`)
+
+    } catch (error) {
+      console.error("voiceroom:close-room error:", error)
+    }
+  })
+
+
+  // ─── REQUEST TO SPEAK (listener → host) ───────────────────────────────────
+  socket.on('voiceroom:request-to-speak', async ({ roomId, user }) => {
+    try {
+      const room = await Room.findById(roomId)
+      if (!room) return
+
+      const state = ensureRoom(roomId)
+
+      // Store the pending request
+      state.pendingRequests.set(user._id.toString(), {
+        user,
+        socketId: socket.id,
+      })
+
+      // Find the host's socket and notify them
+      const hostSocketId = userSocketMap.get(room.host.toString())
+      if (hostSocketId) {
+        socket.to(hostSocketId).emit('voiceroom:speaker-request', {
+          requestingUser: user,
+          roomId,
+        })
+      }
+
+      console.log(`✋ "${user.username}" requested to speak in room ${roomId}`)
+    } catch (error) {
+      console.error("voiceroom:request-to-speak error:", error)
+    }
+  })
+
+
+  // ─── HOST APPROVES SPEAKER REQUEST ────────────────────────────────────────
+  socket.on('voiceroom:approve-speaker', async ({ roomId, userId }, callback) => {
+    try {
+      const room = await Room.findById(roomId)
+      if (!room) return callback?.({ ok: false, error: 'Room not found' })
+
+      const isHost = room.host.toString() === (socket.userId || '')
+      if (!isHost) return callback?.({ ok: false, error: 'Not authorised' })
+
+      const state = ensureRoom(roomId)
+      const request = state.pendingRequests.get(userId.toString())
+
+      if (!request) return callback?.({ ok: false, error: 'No pending request from this user' })
+
+      // Move from listener → speaker in DB
+      const updatedRoom = await Room.findByIdAndUpdate(
+        roomId,
+        {
+          $addToSet: { speaker: userId },
+          $pull: { listener: userId },
+        },
+        { new: true }
+      )
+        .populate('host', 'username profile_Pic')
+        .populate('speaker', 'username profile_Pic')
+        .populate('listener', 'username profile_Pic')
+
+      // Update memory state for the approved user's socket
+      if (request.socketId) {
+        state.speakers.add(request.socketId)
+        state.listeners.delete(request.socketId)
+      }
+
+      // Remove from pending
+      state.pendingRequests.delete(userId.toString())
+
+      // Tell the approved user they're now a speaker
+      if (request.socketId) {
+        socket.to(request.socketId).emit('voiceroom:you-are-approved', {
+          roomId,
+          roomdata: updatedRoom,
+        })
+      }
+
+      // Broadcast updated room to everyone
+      socket.to(roomId).emit('room-data-update', updatedRoom)
+      socket.emit('room-data-update', updatedRoom) // also send to host
+
+      console.log(`✅ Host approved ${userId} as speaker in room ${roomId}`)
+      callback?.({ ok: true, roomdata: updatedRoom })
+
+    } catch (error) {
+      console.error("voiceroom:approve-speaker error:", error)
+      callback?.({ ok: false, error: 'Internal server error' })
+    }
+  })
+
+
+  // ─── HOST DENIES SPEAKER REQUEST ───────────────────────────────────────────
+  socket.on('voiceroom:deny-speaker', async ({ roomId, userId }, callback) => {
+    try {
+      const state = ensureRoom(roomId)
+      const request = state.pendingRequests.get(userId.toString())
+
+      if (request?.socketId) {
+        socket.to(request.socketId).emit('voiceroom:you-are-denied', { roomId })
+      }
+
+      state.pendingRequests.delete(userId.toString())
+      callback?.({ ok: true })
+    } catch (error) {
+      console.error("voiceroom:deny-speaker error:", error)
+    }
+  })
+
+
+  // ─── RTP CAPABILITIES ─────────────────────────────────────────────────────
   socket.on('voiceroom:get-rtp-capabilities', async ({ roomId }, callback) => {
     const router = await getOrCreateRouter(roomId)
     callback(router.rtpCapabilities)
   })
 
-  // create webrtc transport 
+
+  // ─── CREATE WEBRTC TRANSPORT ──────────────────────────────────────────────
   socket.on('voiceroom:create-transport', async ({ roomId, direction }, callback) => {
     const router = await getOrCreateRouter(roomId)
 
@@ -182,41 +335,39 @@ const voiceRoomLogic = async (socket, worker) => {
       iceCandidates: transport.iceCandidates,
       dtlsParameters: transport.dtlsParameters,
     })
-
   })
 
-  // connect transport
+
+  // ─── CONNECT TRANSPORT ────────────────────────────────────────────────────
   socket.on('voiceroom:connect-transport', async ({ direction, dtlsParameters }, callback) => {
     const entry = transportMap.get(socket.id)
     const transport = direction === 'send' ? entry?.sendTransport : entry?.recvTransport
 
-    if (!transport) return callback({ ok: false, error: 'No Transport' })
+    if (!transport) return callback({ ok: false, error: 'No transport found' })
 
     await transport.connect({ dtlsParameters })
-
     callback({ ok: true })
   })
 
-  // produce audio for speaker in the room
-  socket.on('voiceroom:produce', async ({ kind, rtpParameters, roomId }, callback) => {
-    const entry = transportMap.get(socket.id)
-    const currentSendTransport = entry?.sendTransport
-    if (!currentSendTransport) return callback({ ok: false, error: 'Cannot Produce the audio' })
 
-    const producer = await currentSendTransport.produce({ kind, rtpParameters })
+  // ─── PRODUCE (mic) ───────────────────────────────────────────────────────
+  socket.on('voiceroom:produce', async ({ kind, rtpParameters, roomId, appData }, callback) => {
+    const entry = transportMap.get(socket.id)
+    const sendTransport = entry?.sendTransport
+    if (!sendTransport) return callback({ ok: false, error: 'No send transport' })
+
+    const producer = await sendTransport.produce({ kind, rtpParameters, appData })
 
     producer.on('transportclose', () => {
-      console.log('producer transport closed')
+      console.log('Producer transport closed')
       producer.close()
     })
 
-    // If the speaker explicitly stops their mic
-    socket.on('voiceroom:close-producer', () => {
-      producer.close()
-      socket.to(roomId).emit('voiceroom:producer-closed', { producerId: producer.id })
-    })
+    // Store producer in the entry so we can close it later
+    entry.producer = producer
+    transportMap.set(socket.id, entry)
 
-    producer.appData = { roomId }
+    producer.appData = { ...producer.appData, roomId }
 
     socket.to(roomId).emit('voiceroom:new-producer', {
       producerId: producer.id,
@@ -227,23 +378,24 @@ const voiceRoomLogic = async (socket, worker) => {
   })
 
 
-  socket.on('disconnect', () => {
-    const entry = transportMap.get(socket.id);
-    if (entry) {
-      if (entry.sendTransport) entry.sendTransport.close();
-      if (entry.recvTransport) entry.recvTransport.close();
-      transportMap.delete(socket.id);
+  // ─── CLOSE PRODUCER (muted/stepped down) ─────────────────────────────────
+  socket.on('voiceroom:close-producer', async ({ roomId }) => {
+    const entry = transportMap.get(socket.id)
+    const producer = entry?.producer
+
+    if (producer) {
+      producer.close()
+      socket.to(roomId).emit('voiceroom:producer-closed', {
+        producerId: producer.id,
+        socketId: socket.id,
+      })
+      entry.producer = null
+      transportMap.set(socket.id, entry)
     }
-
-    // Cleanup memory room state
-    for (const [roomId, room] of roomState.entries()) {
-      room.speakers.delete(socket.id);
-      room.listeners.delete(socket.id);
-    }
-  });
+  })
 
 
-  // server.js (inside io.on('connection'))
+  // ─── CONSUME ──────────────────────────────────────────────────────────────
   socket.on('voiceroom:consume', async ({ roomId, producerId, rtpCapabilities }, cb) => {
     const router = await getOrCreateRouter(roomId)
 
@@ -270,41 +422,76 @@ const voiceRoomLogic = async (socket, worker) => {
   })
 
 
-  socket.on('voiceroom:close-producer', async ({ roomId }) => {
-    const entry = transportMap.get(socket.id);
-    const producer = entry?.producer; // Ensure you stored the producer in the entry!
-
-    if (producer) {
-      producer.close();
-      // Notify everyone else in the room
-      socket.to(roomId).emit('voiceroom:producer-closed', {
-        producerId: producer.id,
-        socketId: socket.id
-      });
-    }
-  });
-
-
+  // ─── DISCONNECT (cleanup on abrupt close) ────────────────────────────────
   socket.on('disconnecting', async () => {
-    // socket.rooms is a Set containing the socket's id and any rooms they joined
     for (const roomId of socket.rooms) {
-      if (roomId !== socket.id) {
-        // Remove user from both arrays in DB
-        const updatedRoom = await Room.findByIdAndUpdate(
-          roomId,
-          { $pull: { listener: socket.userId, speaker: socket.userId } },
-          { new: true }
-        ).populate([
-          { path: 'host', model: User },
-          { path: 'speaker', model: User },
-          { path: 'listener', model: User }
-        ])
+      if (roomId === socket.id) continue // skip personal room
 
-        // Notify others in the room
-        socket.to(roomId).emit('room-data-update', updatedRoom);
+      try {
+        const room = await Room.findById(roomId)
+        if (!room) continue
+
+        const isHost = room.host.toString() === (socket.userId || '')
+
+        if (isHost) {
+          // Host disconnected → close the entire room
+          socket.to(roomId).emit('room-closed', {
+            roomId,
+            message: 'The host has left. The room is now closed.',
+          })
+
+          // Clean up router
+          if (roomRouter.has(roomId)) {
+            roomRouter.get(roomId).close()
+            roomRouter.delete(roomId)
+          }
+
+          roomState.delete(roomId)
+          await Room.findByIdAndDelete(roomId)
+          console.log(`🗑️ Room ${roomId} auto-closed because host disconnected`)
+
+        } else {
+          // Regular user disconnected
+          const updatedRoom = await Room.findByIdAndUpdate(
+            roomId,
+            { $pull: { listener: socket.userId, speaker: socket.userId } },
+            { new: true }
+          )
+            .populate('host', 'username profile_Pic')
+            .populate('speaker', 'username profile_Pic')
+            .populate('listener', 'username profile_Pic')
+
+          socket.to(roomId).emit('room-data-update', updatedRoom)
+
+          const state = roomState.get(roomId)
+          if (state) {
+            state.speakers.delete(socket.id)
+            state.listeners.delete(socket.id)
+          }
+
+          console.log(`🧹 User ${socket.userId} disconnected from room ${roomId}`)
+        }
+      } catch (err) {
+        console.error(`disconnecting cleanup error for room ${roomId}:`, err)
       }
     }
-  });
+  })
+
+  socket.on('disconnect', () => {
+    // Clean up transports
+    const entry = transportMap.get(socket.id)
+    if (entry) {
+      if (entry.sendTransport) entry.sendTransport.close()
+      if (entry.recvTransport) entry.recvTransport.close()
+      transportMap.delete(socket.id)
+    }
+
+    // Clean up memory room state
+    for (const [, state] of roomState.entries()) {
+      state.speakers.delete(socket.id)
+      state.listeners.delete(socket.id)
+    }
+  })
 }
 
-export default voiceRoomLogic;
+export default voiceRoomLogic

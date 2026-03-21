@@ -31,6 +31,8 @@ const initializeSocketConnection = async (server) => {
       methods: ['GET', 'POST'],
       credentials: true,
     },
+    pingTimeout: 60000,
+    pingInterval: 25000
   });
 
   //Middleware
@@ -38,7 +40,7 @@ const initializeSocketConnection = async (server) => {
 
   //  connection logic
   io.on('connection', (socket) => {
-    console.log(`A user connected: ${socket.id}`);
+    console.log(`User ${socket.handshake.auth.userId || 'anon'} connected: ${socket.id}`)
 
     const userId = socket.handshake.query.userId;
     if (userId) {

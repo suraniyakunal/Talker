@@ -10,7 +10,7 @@ function MainLayout() {
     <>
       <div className="h-screen w-full flex flex-col overflow-hidden bg-[#0B0B0B]">
         <Navbar />
-        <div className="flex-1 w-full overflow-y-auto bg-[#0B0B0B]">
+        <div className="flex-1 w-full overflow-hidden bg-[#0B0B0B]">
           <Outlet />
         </div>
       </div>
