@@ -17,7 +17,7 @@ export const chatLogic = async (socket, io, userSocketMap) => {
 
   socket.on('join-chats', (room) => {
     socket.join(room);
-    console.log(`User ${socket.id} joined: ${room}`);
+    console.log(`User ${socket.id} joined: ${room}`)
   });
 
   socket.on('new-message', (newMessage) => {
@@ -27,6 +27,13 @@ export const chatLogic = async (socket, io, userSocketMap) => {
 
   socket.on('leave-chats', (room) => {
     socket.leave(room);
-    console.log(`user ${socket.id} has left the room ${room}`);
+    console.log(`user ${socket.id} has left the room ${room}`)
   });
+
+  // ── Voice room live chat ──────────────────────────────────────────────────
+  // Broadcast a room chat message to everyone else in the voice room socket channel
+  socket.on('voiceroom:chat-message', ({ roomId, message }) => {
+    if (!roomId || !message?.text?.trim()) return
+    socket.to(roomId).emit('voiceroom:chat-message', message)
+  })
 };
