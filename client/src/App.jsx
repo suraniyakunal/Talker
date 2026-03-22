@@ -10,6 +10,7 @@ const Chats = lazy(() => import('./components/Chats.jsx'));
 const MainLayout = lazy(() => import('./components/MainLayout.jsx'));
 const Rooms = lazy(() => import('./components/Rooms.jsx'));
 const RoomView = lazy(() => import('./components/RoomView.jsx'));
+const LiveRoomView = lazy(() => import('./components/LiveRoomView.jsx'));
 const CreateRoom = lazy(() => import('./components/CreateRoom.jsx'));
 const Posts = lazy(() => import('./components/Posts.jsx'));
 const Profile = lazy(() => import('./components/Profile.jsx'));
@@ -37,6 +38,7 @@ function App() {
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
             <Route path="rooms/:roomId" element={user ? <RoomView /> : <Navigate to="/login" />} />
+            <Route path="liverooms/:roomId" element={user ? <LiveRoomView /> : <Navigate to="/login" />} />
             <Route path="rooms/createRoom" element={user ? <CreateRoom /> : <Navigate to="/login" />} />
             <Route path="posts" element={user ? <Posts /> : <Navigate to="/login" />} />
             <Route path="profile" element={user ? <Profile /> : <Navigate to="/login" />} />

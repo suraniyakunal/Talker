@@ -13,6 +13,7 @@ const RoomCards = ({
   participants,
   speakers,
   isPrivate,
+  type,
 }) => {
   const socket = useSocket();
   const navigate = useNavigate();
@@ -20,8 +21,12 @@ const RoomCards = ({
 
   const handleClick = async (e) => {
     e.preventDefault();
-    navigate(`${roomId}`);
-  }
+    if (type === 'liveroom') {
+      navigate(`/liverooms/${roomId}`);
+    } else {
+      navigate(`/rooms/${roomId}`);
+    }
+  };
   // --- INLINE SVGS ---
   const UsersIcon = () => (
     <svg
@@ -77,6 +82,7 @@ const RoomCards = ({
   return (
     <div
       key={roomId}
+      onClick={handleClick}
       className="group bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 hover:bg-zinc-900/60 transition-all cursor-pointer relative overflow-hidden"
     >
 
