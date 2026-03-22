@@ -98,16 +98,16 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const updateProfile = async (req, res) => {};
+const updateProfile = async (req, res) => { };
 
 export const searchUsers = async (req, res, next) => {
   const keyword = req.query.search
     ? {
-        $or: [
-          { name: { $regex: req.query.search, $options: 'i' } },
-          { email: { $regex: req.query.search, $options: 'i' } },
-        ],
-      }
+      $or: [
+        { name: { $regex: req.query.search, $options: 'i' } },
+        { email: { $regex: req.query.search, $options: 'i' } },
+      ],
+    }
     : {};
 
   // Combine the keyword search with excluding the current user
@@ -241,6 +241,58 @@ const getAllFriends = async (req, res) => {
   }
 };
 
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('followers', 'username profile_Pic')
+      .populate('following', 'username profile_Pic');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const toggleFollow = async (req, res) => {
+  try {
+    const currentUserId = req.user._id;
+    const targetUserId = req.params.id;
+
+    if (currentUserId.toString() === targetUserId) {
+      return res.status(400).json({ message: 'You cannot follow yourself' });
+    }
+
+    const targetUser = await User.findById(targetUserId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!targetUser || !currentUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isFollowing = currentUser.following.includes(targetUserId);
+
+    if (isFollowing) {
+      currentUser.following.pull(targetUserId);
+      targetUser.followers.pull(currentUserId);
+    } else {
+      currentUser.following.push(targetUserId);
+      targetUser.followers.push(currentUserId);
+    }
+
+    await currentUser.save();
+    await targetUser.save();
+
+    res.status(200).json({
+      message: isFollowing ? 'Unfollowed successfully' : 'Followed successfully',
+      isFollowing: !isFollowing,
+      followersCount: targetUser.followers.length
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export default {
   login,
   signUp,
@@ -253,4 +305,6 @@ export default {
   getAllFriendRequests,
   acceptRequest,
   getAllFriends,
+  getUserProfile,
+  toggleFollow,
 };

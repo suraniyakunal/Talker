@@ -8,6 +8,7 @@ import dbContext from './controllers/dbConnection.js';
 import userRouter from './routes/userRoutes.js';
 import roomRouter from './routes/roomRoutes.js';
 import chatRouter from './routes/chatRoutes.js';
+import postRouter from './routes/postRoutes.js';
 
 
 // loadEnvFile('.env.dev')
@@ -48,6 +49,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRouter);
 app.use('/api/rooms', roomRouter);
 app.use('/api/chats', chatRouter);
+app.use('/api/posts', postRouter);
 
 const PORT = process.env.PORT || 3000;
 
