@@ -29,25 +29,27 @@ function App() {
 
   return (
     <SocketProvider>
-      <Suspense fallback={PageLoader()}>
+      <Suspense fallback={<PageLoader />}>
         <Routes>
-          <Route element={<MainLayout />}>
+          {/* Public access only when NOT logged in */}
+          <Route path="/login" element={!user ? <Login /> : <Navigate to="/chats" replace />} />
+          <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/chats" replace />} />
+
+          {/* Protected area - requires user */}
+          <Route element={user ? <MainLayout /> : <Navigate to="/login" replace />}>
             <Route path="/" element={<Navigate to="/chats" replace />} />
-            <Route path="chats" element={user ? <Chats /> : <Navigate to="/login" />} />
-            <Route path="chats/:conversationId" element={user ? <Chats /> : <Navigate to="/login" />} />
-            <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
-            <Route path="rooms" element={user ? <Rooms /> : <Navigate to="/login" />} />
-            <Route path="rooms/:roomId" element={user ? <RoomView /> : <Navigate to="/login" />} />
-            <Route path="liverooms/:roomId" element={user ? <LiveRoomView /> : <Navigate to="/login" />} />
-            <Route path="rooms/createRoom" element={user ? <CreateRoom /> : <Navigate to="/login" />} />
-            <Route path="posts" element={user ? <Posts /> : <Navigate to="/login" />} />
-            <Route path="profile" element={user ? <Profile /> : <Navigate to="/login" />} />
+            <Route path="chats" element={<Chats />} />
+            <Route path="chats/:conversationId" element={<Chats />} />
+            <Route path="rooms" element={<Rooms />} />
+            <Route path="rooms/:roomId" element={<RoomView />} />
+            <Route path="liverooms/:roomId" element={<LiveRoomView />} />
+            <Route path="rooms/createRoom" element={<CreateRoom />} />
+            <Route path="posts" element={<Posts />} />
+            <Route path="profile" element={<Profile />} />
           </Route>
 
-          <Route path="/login" element={!user ? <Login /> : <Navigate to={'/chats'} />} />
-          <Route path="/signup" element={!user ? <Signup /> : <Navigate to={'/chats'} />} />
-
-          <Route path="*" element={<NotFound />} />
+          {/* Fallback for any unknown route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </SocketProvider>
