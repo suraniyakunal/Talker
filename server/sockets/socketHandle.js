@@ -4,6 +4,7 @@ import Room from '../models/roomModel.js';
 import mediasoup from 'mediasoup';
 import { chatLogic } from './chatLogic.js';
 import voiceRoomLogic from './voiceRoomLogic.js';
+import liveRoomLogic from './liveRoomLogic.js';
 
 let worker;
 let userSocketMap = new Map();
@@ -48,6 +49,7 @@ const initializeSocketConnection = async (server) => {
     }
     chatLogic(socket, io, userSocketMap);
     voiceRoomLogic(socket, worker, userSocketMap);
+    liveRoomLogic(socket, worker, userSocketMap);
 
     socket.on('disconnect', () => {
       console.log('🧹 Full cleanup for:', socket.id);

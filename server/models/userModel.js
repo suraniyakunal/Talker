@@ -8,7 +8,12 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true, trim: true },
     role: { type: String, enum: ['Normal', 'Moderator', 'Vip'], default: 'Normal' },
     friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     profile_Pic: { type: String, default: '' },
+    bio: { type: String, default: '' },
+    location: { type: String, default: '' },
+    link: { type: String, default: '' },
   },
   { timestamps: true }
 );

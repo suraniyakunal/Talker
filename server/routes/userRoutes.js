@@ -16,5 +16,7 @@ router.post('/logout', protectedRoute, userController.logout);
 router.put('/update-profile', protectedRoute, userController.updateProfile);
 
 router.get('/check', protectedRoute, userController.checkAuth);
+router.get('/:id', protectedRoute, userController.getUserProfile);
+router.post('/toggle-follow/:id', protectedRoute, userController.toggleFollow);
 
 export default router;
