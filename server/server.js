@@ -12,7 +12,7 @@ import postRouter from './routes/postRoutes.js';
 
 
 // loadEnvFile('.env.dev')
-dotenv.config('.env.dev');
+// dotenv.config(); // If using --env-file, you don't need this.
 // console.log(process.env)
 export const app = express();
 const uri = process.env.MONGODB_URL;
@@ -24,7 +24,7 @@ app.use(cookieParser());
 //global middleware
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true,
   })
