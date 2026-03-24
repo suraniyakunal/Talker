@@ -1,6 +1,5 @@
 import express, { json } from 'express';
 import http from 'http';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { initializeSocketConnection } from './sockets/socketHandle.js';
@@ -11,9 +10,6 @@ import chatRouter from './routes/chatRoutes.js';
 import postRouter from './routes/postRoutes.js';
 
 
-// loadEnvFile('.env.dev')
-// dotenv.config(); // If using --env-file, you don't need this.
-// console.log(process.env)
 export const app = express();
 const uri = process.env.MONGODB_URL;
 
