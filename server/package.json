@@ -6,7 +6,8 @@
   "scripts": {
     "test": "NODE_ENV=test jest --watchAll",
     "dev": "nodemon --env-file=.env.dev server.js",
-    "start": "node --env-file=.env.prod server.js"
+    "start": "node server.js",
+    "start:local": "node --env-file=.env.prod server.js"
   },
   "jest": {
     "setupFiles": [
